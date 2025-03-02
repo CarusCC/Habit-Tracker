@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DailyHabits</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --light-gray: #f3f4f6;
+            --border-color: #e5e7eb;
+            --success-color: #10b981;
+            --meditation-color: #a7f3d0;
+            --vocab-color: #fef3c7;
+            --gaming-color: #dbeafe;
+            --bg-color: #ffffff;
+            --text-color: #333;
+            --cell-hover-color: #f9fafb;
+        }
+        
+        [data-theme="dark"] {
+            --primary-color: #818cf8;
+            --light-gray: #374151;
+            --border-color: #4b5563;
+            --success-color: #34d399;
+            --meditation-color: #059669;
+            --vocab-color: #fbbf24;
+            --gaming-color: #3b82f6;
+            --bg-color: #111827;
+            --text-color: #f9fafb;
+            --cell-hover-color: #1f2937;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .theme-toggle {
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            background-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .month-nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem 0;
+        }
+        
+        .month-display {
+            font-size: 1.25rem;
+            font-weight: 500;
+        }
+        
+        .nav-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.25rem;
+        }
+        
+        .calendar {
+            margin: 0 auto;
+            max-width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            background-color: var(--bg-color);
+        }
+        
+        .calendar-inner {
+            width: 100%;
+            display: table;
+            table-layout: fixed;
+            border-collapse: collapse;
+        }
+        
+        .calendar-header {
+            display: table-row;
+        }
+        
+        .header-cell {
+            display: table-cell;
+            padding: 0.75rem 0.5rem;
+            text-align: center;
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: normal;
+            font-size: 0.875rem;
+            background-color: var(--bg-color);
+        }
+        
+        .header-cell:first-child {
+            width: 200px;
+            text-align: left;
+        }
+        
+        .day-number {
+            padding: 0.75rem 0.5rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            font-size: 0.875rem;
+        }
+        
+        .habits-title {
+            padding: 0.75rem;
+            text-align: center;
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .habit-row {
+            display: table-row;
+            cursor: move;
+        }
+        
+        .habit-name-container {
+            display: table-cell;
+            padding: 1rem;
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            width: 200px;
+            position: relative;
+        }
+        
+        .habit-name {
+            cursor: text;
+            width: calc(100% - 30px);
+            display: inline-block;
+        }
+        
+        .habit-name:hover {
+            background-color: var(--cell-hover-color);
+        }
+        
+        .delete-habit {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 1.25rem;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+        
+        .delete-habit:hover {
+            opacity: 1;
+        }
+        
+        .habit-cell {
+            display: table-cell;
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            text-align: center;
+            vertical-align: middle;
+            height: 50px;
+            position: relative;
+        }
+        
+        .completed {
+            position: relative;
+        }
+        
+        .completed::after {
+            content: "✓";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--success-color);
+            font-size: 1.25rem;
+        }
+        
+        .crossed {
+            position: relative;
+        }
+        
+        .crossed::after {
+            content: "✗";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ef4444;
+            font-size: 1.25rem;
+        }
+        
+        .vocab-cell.completed {
+            background-color: var(--vocab-color);
+        }
+        
+        .meditation-cell.completed {
+            background-color: var(--meditation-color);
+        }
+        
+        .gaming-cell.completed {
+            background-color: var(--gaming-color);
+        }
+        
+        .custom-cell-1.completed {
+            background-color: #bfdbfe;
+        }
+        
+        .custom-cell-2.completed {
+            background-color: #c7d2fe;
+        }
+        
+        .custom-cell-3.completed {
+            background-color: #ddd6fe;
+        }
+        
+        .custom-cell-4.completed {
+            background-color: #fbcfe8;
+        }
+        
+        .custom-cell-5.completed {
+            background-color: #fecaca;
+        }
+        
+        .vocab-cell.crossed,
+        .meditation-cell.crossed,
+        .gaming-cell.crossed,
+        .custom-cell-1.crossed,
+        .custom-cell-2.crossed,
+        .custom-cell-3.crossed,
+        .custom-cell-4.crossed,
+        .custom-cell-5.crossed {
+            background-color: rgba(239, 68, 68, 0.2);
+        }
+        
+        .today {
+            background-color: #4b5563;
+            color: white;
+        }
+        
+        .add-habit-btn {
+            margin: 1rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-color);
+        }
+        
+        .habit-name-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+        
+        .edit-mode {
+            padding: 0.5rem;
+        }
+        
+        /* Added to ensure date columns are evenly sized */
+        .day-cell {
+            width: calc((100% - 200px) / 31); /* For up to 31 days in a month */
+        }
+        
+        /* Drag and drop styles */
+        .habit-row.dragging {
+            opacity: 0.5;
+            background-color: var(--light-gray);
+        }
+        
+        .habit-row.drag-over {
+            border-top: 2px solid var(--primary-color);
+        }
+        
+        .habit-note {
+            display: none;
+            position: absolute;
+            z-index: 10;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            width: 200px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .note-textarea {
+            width: 100%;
+            min-height: 80px;
+            border: 1px solid var(--border-color);
+            border-radius: 0.25rem;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        
+        /* Heat map styles */
+        .heat-map-container {
+            margin: 1rem;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            background-color: var(--bg-color);
+        }
+        
+        .heat-map-title {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+        
+        .heat-map {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+        
+        .heat-map-day {
+            width: 20px;
+            height: 20px;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        
+        .heat-level-0 {
+            background-color: var(--border-color);
+        }
+        
+        .heat-level-1 {
+            background-color: rgba(16, 185, 129, 0.2);
+        }
+        
+        .heat-level-2 {
+            background-color: rgba(16, 185, 129, 0.4);
+        }
+        
+        .heat-level-3 {
+            background-color: rgba(16, 185, 129, 0.6);
+        }
+        
+        .heat-level-4 {
+            background-color: rgba(16, 185, 129, 0.8);
+        }
+        
+        .heat-level-5 {
+            background-color: rgba(16, 185, 129, 1);
+        }
+        
+        /* Note indicator styles */
+        .has-note::before {
+            content: "📝";
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+        
+        /* Graph styles */
+        .graph-container {
+            margin: 1rem;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            background-color: var(--bg-color);
+        }
+        
+        .graph-title {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+        
+        .graph-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .graph-select {
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.25rem;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        
+        .graph-canvas-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        canvas {
+            background-color: var(--bg-color);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">DailyHabits</div>
+        <div class="theme-toggle" id="theme-toggle">
+            <span id="theme-icon">🌙</span>
+        </div>
+    </header>
+    
+    <div class="month-nav">
+        <button class="nav-btn" id="prev-month">❮</button>
+        <div class="month-display">February, 2025</div>
+        <button class="nav-btn" id="next-month">❯</button>
+    </div>
+    
+    <div class="calendar">
+        <div class="calendar-inner" id="calendar-table">
+            <!-- Calendar content will be generated by JavaScript -->
+        </div>
+    </div>
+    
+    <div class="heat-map-container">
+        <div class="heat-map-title">Habit Completion Heat Map</div>
+        <div class="heat-map" id="heat-map">
+            <!-- Heat map will be generated by JavaScript -->
+        </div>
+    </div>
+    
+    <div class="graph-container">
+        <div class="graph-title">Habit Completion Trends</div>
+        <div class="graph-controls">
+            <select id="graph-habit-select" class="graph-select">
+                <option value="all">All Habits</option>
+                <!-- Habit options will be added dynamically -->
+            </select>
+            <select id="graph-period-select" class="graph-select">
+                <option value="week">Last 7 Days</option>
+                <option value="month" selected>Current Month</option>
+                <option value="3months">Last 3 Months</option>
+            </select>
+        </div>
+        <div class="graph-canvas-container">
+            <canvas id="habit-graph"></canvas>
+        </div>
+    </div>
+    
+    <button class="add-habit-btn" id="add-habit-btn">+ New Habit</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Date management
+            const prevMonthBtn = document.getElementById('prev-month');
+            const nextMonthBtn = document.getElementById('next-month');
+            const monthDisplay = document.querySelector('.month-display');
+            const calendarTable = document.getElementById('calendar-table');
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = document.getElementById('theme-icon');
+            const heatMapContainer = document.getElementById('heat-map');
+            const graphHabitSelect = document.getElementById('graph-habit-select');
+            const graphPeriodSelect = document.getElementById('graph-period-select');
+            const habitGraphCanvas = document.getElementById('habit-graph');
+            
+            // Chart instance
+            let habitChart = null;
+            
+            // Theme management
+            let isDarkMode = localStorage.getItem('dailyHabits_darkMode') === 'true';
+            
+            // Apply theme based on saved preference
+            if (isDarkMode) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = '☀️';
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                themeIcon.textContent = '🌙';
+            }
+            
+            // Theme toggle event
+            themeToggle.addEventListener('click', function() {
+                isDarkMode = !isDarkMode;
+                if (isDarkMode) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    themeIcon.textContent = '☀️';
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                    themeIcon.textContent = '🌙';
+                }
+                localStorage.setItem('dailyHabits_darkMode', isDarkMode);
+                updateHeatMap(); // Refresh heat map with new theme colors
+                updateHabitGraph(); // Refresh graph with new theme colors
+            });
+            
+            const months = [
+                'January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'
+            ];
+            
+            const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+            
+            // Initialize with February 2025
+            let currentDate = new Date(2025, 1, 1); // Month is 0-indexed in JS Date
+            
+            // Initial habit data (will be overridden by localStorage if available)
+            let habits = [
+                { name: 'Vocabulary before 7:30am', type: 'vocab' },
+                { name: 'Meditation', type: 'meditation' },
+                { name: 'No gaming', type: 'gaming' }
+            ];
+            
+            // Initialize completed days (empty for now, will be loaded from localStorage)
+            let completedDays = {};
+            
+            // Initialize notes
+            let habitNotes = {};
+            
+            // Drag and drop variables
+            let draggedElement = null;
+            
+            // Load data from localStorage if available
+            function loadFromLocalStorage() {
+                const savedHabits = localStorage.getItem('dailyHabits_habits');
+                const savedCompletedDays = localStorage.getItem('dailyHabits_completedDays');
+                const savedCurrentDate = localStorage.getItem('dailyHabits_currentDate');
+                const savedHabitNotes = localStorage.getItem('dailyHabits_habitNotes');
+                const savedDarkMode = localStorage.getItem('dailyHabits_darkMode');
+                
+                if (savedHabits) {
+                    habits = JSON.parse(savedHabits);
+                }
+                
+                if (savedCompletedDays) {
+                    completedDays = JSON.parse(savedCompletedDays);
+                }
+                
+                if (savedCurrentDate) {
+                    const dateObj = new Date(savedCurrentDate);
+                    // Only use saved date if it's valid
+                    if (!isNaN(dateObj.getTime())) {
+                        currentDate = dateObj;
+                    }
+                }
+                
+                if (savedHabitNotes) {
+                    habitNotes = JSON.parse(savedHabitNotes);
+                }
+                
+                if (savedDarkMode) {
+                    isDarkMode = savedDarkMode === 'true';
+                    if (isDarkMode) {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                        themeIcon.textContent = '☀️';
+                    }
+                }
+            }
+            
+            // Save data to localStorage
+            function saveToLocalStorage() {
+                localStorage.setItem('dailyHabits_habits', JSON.stringify(habits));
+                localStorage.setItem('dailyHabits_completedDays', JSON.stringify(completedDays));
+                localStorage.setItem('dailyHabits_currentDate', currentDate.toISOString());
+                localStorage.setItem('dailyHabits_habitNotes', JSON.stringify(habitNotes));
+                localStorage.setItem('dailyHabits_darkMode', isDarkMode);
+            }
+            
+            // Function to get days in month
+            function getDaysInMonth(year, month) {
+                return new Date(year, month + 1, 0).getDate();
+            }
+            
+            // Function to update calendar headers and days based on current month/year
+            function updateCalendar() {
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth();
+                
+                // Update month/year display
+                monthDisplay.textContent = `${months[month]}, ${year}`;
+                
+                // Get total days in month
+                const daysInMonth = getDaysInMonth(year, month);
+                
+                // Clear previous calendar content
+                calendarTable.innerHTML = '';
+                
+                // Create header row
+                const headerRow = document.createElement('div');
+                headerRow.className = 'calendar-header';
+                
+                // Add empty cell for habit names column
+                const emptyHeaderCell = document.createElement('div');
+                emptyHeaderCell.className = 'header-cell';
+                emptyHeaderCell.textContent = 'Habits';
+                headerRow.appendChild(emptyHeaderCell);
+                
+                // Add day headers (S, M, T, W, etc.)
+                for (let i = 0; i < daysInMonth; i++) {
+                    const dayDate = new Date(year, month, i + 1);
+                    const weekdayIndex = dayDate.getDay(); // 0 = Sunday, 6 = Saturday
+                    
+                    const headerCell = document.createElement('div');
+                    headerCell.className = 'header-cell day-cell';
+                    headerCell.textContent = weekdays[weekdayIndex];
+                    headerRow.appendChild(headerCell);
+                }
+                
+                calendarTable.appendChild(headerRow);
+                
+                // Create day numbers row
+                const dayNumbersRow = document.createElement('div');
+                dayNumbersRow.className = 'habit-row';
+                
+                // Add empty cell for the habit names column
+                const emptyDayCell = document.createElement('div');
+                emptyDayCell.className = 'header-cell';
+                dayNumbersRow.appendChild(emptyDayCell);
+                
+                // Today's date for highlighting
+                const today = new Date();
+                const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
+                
+                // Add day numbers
+                for (let i = 0; i < daysInMonth; i++) {
+                    const dayNumber = i + 1;
+                    const isToday = isCurrentMonth && today.getDate() === dayNumber;
+                    
+                    const dayCell = document.createElement('div');
+                    dayCell.className = isToday ? 'header-cell day-cell today' : 'header-cell day-cell';
+                    dayCell.textContent = dayNumber;
+                    dayNumbersRow.appendChild(dayCell);
+                }
+                
+                calendarTable.appendChild(dayNumbersRow);
+                
+                // Create a row for each habit
+                habits.forEach((habit, index) => {
+                    const habitRow = document.createElement('div');
+                    habitRow.className = 'habit-row';
+                    habitRow.setAttribute('data-habit-type', habit.type);
+                    habitRow.setAttribute('draggable', 'true');
+                    
+                    // Setup drag events for reordering
+                    setupDragEvents(habitRow);
+                    
+                    // Add habit name cell with delete button
+                    const habitNameContainer = document.createElement('div');
+                    habitNameContainer.className = 'habit-name-container';
+                    
+                    const habitNameElement = document.createElement('div');
+                    habitNameElement.className = 'habit-name';
+                    habitNameElement.setAttribute('data-editable', 'true');
+                    habitNameElement.textContent = habit.name;
+                    habitNameContainer.appendChild(habitNameElement);
+                    
+                    // Add delete button
+                    const deleteButton = document.createElement('span');
+                    deleteButton.className = 'delete-habit';
+                    deleteButton.innerHTML = '×';
+                    deleteButton.setAttribute('title', 'Delete habit');
+                    deleteButton.addEventListener('click', function(e) {
+                        e.stopPropagation(); // Prevent event bubbling
+                        if (confirm(`Are you sure you want to delete "${habit.name}"?`)) {
+                            // Remove habit from array
+                            const index = habits.findIndex(h => h.type === habit.type);
+                            if (index !== -1) {
+                                habits.splice(index, 1);
+                                // Remove completion data for this habit
+                                Object.keys(completedDays).forEach(key => {
+                                    if (key.includes(`-${habit.type}`)) {
+                                        delete completedDays[key];
+                                    }
+                                });
+                                // Remove notes for this habit
+                                Object.keys(habitNotes).forEach(key => {
+                                    if (key.includes(`-${habit.type}`)) {
+                                        delete habitNotes[key];
+                                    }
+                                });
+                                saveToLocalStorage(); // Save after deleting
+                                updateCalendar();
+                                updateHeatMap();
+                                updateHabitGraph(); // Update graph after deleting habit
+                            }
+                        }
+                    });
+                    habitNameContainer.appendChild(deleteButton);
+                    
+                    habitRow.appendChild(habitNameContainer);
+                    
+                    // Determine the CSS class for custom habits (for coloring)
+                    let customCellClass = '';
+                    if (habit.type.startsWith('custom-')) {
+                        const customIndex = (index - 3) % 5 + 1; // -3 because we have 3 default habits
+                        customCellClass = ` custom-cell-${customIndex}`;
+                    }
+                    
+                    // Add a cell for each day in the month
+                    for (let i = 0; i < daysInMonth; i++) {
+                        const dayNumber = i + 1;
+                        const dateKey = `${year}-${month}-${dayNumber}-${habit.type}`;
+                        
+                        const habitCell = document.createElement('div');
+                        habitCell.className = `habit-cell ${habit.type}-cell${customCellClass} day-cell`;
+                        habitCell.setAttribute('data-date', dateKey);
+                        
+                        // Check if this day is completed or crossed
+                        if (completedDays[dateKey] === true) {
+                            habitCell.classList.add('completed');
+                        } else if (completedDays[dateKey] === 'crossed') {
+                            habitCell.classList.add('crossed');
+                        }
+                        
+                        // Check if this cell has a note and add indicator
+                        if (habitNotes[dateKey]) {
+                            habitCell.classList.add('has-note');
+                            habitCell.setAttribute('title', 'Double-click to view/edit note');
+                        }
+                        
+                        // Add click event to toggle completion
+                        habitCell.addEventListener('click', function(e) {
+                            // Left click for completed
+                            this.classList.remove('crossed');
+                            if (this.classList.contains('completed')) {
+                                this.classList.remove('completed');
+                                completedDays[dateKey] = false;
+                            } else {
+                                this.classList.add('completed');
+                                completedDays[dateKey] = true;
+                            }
+                            saveToLocalStorage(); // Save after changing completion status
+                            updateHeatMap(); // Update heat map after changing status
+                            updateHabitGraph(); // Update graph after changing status
+                        });
+                        
+                        // Add right-click event for crossed
+                        habitCell.addEventListener('contextmenu', function(e) {
+                            e.preventDefault(); // Prevent context menu
+                            this.classList.remove('completed');
+                            if (this.classList.contains('crossed')) {
+                                this.classList.remove('crossed');
+                                completedDays[dateKey] = false;
+                            } else {
+                                this.classList.add('crossed');
+                                completedDays[dateKey] = 'crossed';
+                            }
+                            saveToLocalStorage();
+                            updateHeatMap();
+                            updateHabitGraph(); // Update graph after changing status
+                        });
+                        
+                        // Add double-click event for notes
+                        habitCell.addEventListener('dblclick', function(e) {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            showNoteEditor(dateKey, this);
+                        });
+                        
+                        habitRow.appendChild(habitCell);
+                    }
+                    
+                    calendarTable.appendChild(habitRow);
+                });
+                
+                // Make habit names editable
+                setupEditableHabitNames();
+                
+                // Update heat map
+                updateHeatMap();
+                
+                // Update graph habit select options
+                updateGraphHabitSelect();
+                
+                // Update the graph
+                updateHabitGraph();
+                
+                // Save the current state to localStorage
+                saveToLocalStorage();
+            }
+            
+            // Function to show note editor
+            function showNoteEditor(dateKey, cell) {
+                // Remove any existing note editors
+                const existingNotes = document.querySelectorAll('.habit-note');
+                existingNotes.forEach(note => note.remove());
+                
+                // Create note container
+                const noteContainer = document.createElement('div');
+                noteContainer.className = 'habit-note';
+                noteContainer.style.display = 'block'; // Make sure it's visible
+                
+                // Create textarea
+                const textarea = document.createElement('textarea');
+                textarea.className = 'note-textarea';
+                textarea.placeholder = 'Add a note...';
+                
+                // Load existing note if any
+                if (habitNotes[dateKey]) {
+                    textarea.value = habitNotes[dateKey];
+                }
+                
+                // Add blur event to save note
+                textarea.addEventListener('blur', function() {
+                    if (this.value.trim()) {
+                        habitNotes[dateKey] = this.value.trim();
+                        cell.classList.add('has-note');
+                        cell.setAttribute('title', 'Double-click to view/edit note');
+                    } else {
+                        delete habitNotes[dateKey];
+                        cell.classList.remove('has-note');
+                        cell.removeAttribute('title');
+                    }
+                    saveToLocalStorage();
+                    noteContainer.remove();
+                });
+                
+                // Add keydown event to close on Escape
+                textarea.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        this.blur();
+                    }
+                });
+                
+                // Add textarea to container
+                noteContainer.appendChild(textarea);
+                
+                // Position the note container
+                const cellRect = cell.getBoundingClientRect();
+                noteContainer.style.top = `${cellRect.bottom + window.scrollY + 5}px`;
+                noteContainer.style.left = `${cellRect.left + window.scrollX}px`;
+                
+                // Add to document
+                document.body.appendChild(noteContainer);
+                
+                // Focus the textarea
+                textarea.focus();
+            }
+            
+            // Function to update heat map with dynamic intensity levels
+            function updateHeatMap() {
+                heatMapContainer.innerHTML = '';
+                
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth();
+                const daysInMonth = getDaysInMonth(year, month);
+                
+                // Create heat map cells
+                for (let day = 1; day <= daysInMonth; day++) {
+                    // Count completed habits for this day
+                    let completedCount = 0;
+                    let totalHabits = habits.length;
+                    
+                    habits.forEach(habit => {
+                        const dateKey = `${year}-${month}-${day}-${habit.type}`;
+                        if (completedDays[dateKey] === true) {
+                            completedCount++;
+                        }
+                    });
+                    
+                    // Calculate heat level dynamically based on number of habits
+                    let heatLevel = 0;
+                    if (totalHabits > 0) {
+                        const completionRate = completedCount / totalHabits;
+                        if (completionRate > 0) {
+                            // Use a dynamic number of levels based on total habits
+                            const maxLevels = Math.min(5, totalHabits);
+                            heatLevel = Math.ceil(completionRate * maxLevels);
+                        }
+                    }
+                    
+                    // Create heat map day cell
+                    const heatCell = document.createElement('div');
+                    heatCell.className = `heat-map-day heat-level-${heatLevel}`;
+                    heatCell.setAttribute('title', `${day} ${months[month]}: ${completedCount}/${totalHabits} habits completed`);
+                    
+                    // Add click event to navigate to that day
+                    heatCell.addEventListener('click', function() {
+                        // Scroll to that day in the calendar
+                        const dayElements = document.querySelectorAll('.day-cell');
+                        if (dayElements[day]) {
+                            dayElements[day].scrollIntoView({ behavior: 'smooth' });
+                        }
+                    });
+                    
+                    heatMapContainer.appendChild(heatCell);
+                }
+            }
+            
+            // Function to make habit names editable
+            function setupEditableHabitNames() {
+                const habitNames = document.querySelectorAll('.habit-name[data-editable="true"]');
+                
+                habitNames.forEach(habitName => {
+                    // Remove existing event listener to prevent duplicates
+                    habitName.removeEventListener('click', handleHabitNameClick);
+                    // Add click event listener
+                    habitName.addEventListener('click', handleHabitNameClick);
+                });
+            }
+            
+            function handleHabitNameClick(e) {
+                e.stopPropagation(); // Prevent triggering drag events
+                
+                const habitName = e.target;
+                const currentText = habitName.textContent;
+                
+                // Create input element
+                habitName.classList.add('edit-mode');
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'habit-name-input';
+                input.value = currentText;
+                
+                // Replace text with input
+                habitName.textContent = '';
+                habitName.appendChild(input);
+                input.focus();
+                
+                // Handle input blur (finish editing)
+                input.addEventListener('blur', function() {
+                    const newHabitName = this.value || currentText;
+                    habitName.textContent = newHabitName;
+                    habitName.classList.remove('edit-mode');
+                    
+                    // Update habit name in the habits array
+                    const habitRow = habitName.closest('.habit-row');
+                    const habitType = habitRow.getAttribute('data-habit-type');
+                    const habitIndex = habits.findIndex(h => h.type === habitType);
+                    if (habitIndex !== -1) {
+                        habits[habitIndex].name = newHabitName;
+                        saveToLocalStorage(); // Save after changing habit name
+                        updateHabitGraph(); // Update graph after renaming habit
+                    }
+                });
+                
+                // Handle Enter key
+                input.addEventListener('keydown', function(event) {
+                    if (event.key === 'Enter') {
+                        this.blur(); // Trigger blur event
+                    }
+                });
+                
+                // Prevent drag during editing
+                input.addEventListener('mousedown', function(e) {
+                    e.stopPropagation();
+                });
+            }
+            
+            // Setup drag and drop for habit reordering
+            function setupDragEvents(habitRow) {
+                habitRow.addEventListener('dragstart', function(e) {
+                    draggedElement = this;
+                    setTimeout(() => {
+                        this.classList.add('dragging');
+                    }, 0);
+                });
+                
+                habitRow.addEventListener('dragend', function() {
+                    this.classList.remove('dragging');
+                    draggedElement = null;
+                });
+                
+                habitRow.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    if (draggedElement !== this) {
+                        this.classList.add('drag-over');
+                    }
+                });
+                
+                habitRow.addEventListener('dragleave', function() {
+                    this.classList.remove('drag-over');
+                });
+                
+                habitRow.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('drag-over');
+                    
+                    if (draggedElement !== this) {
+                        // Get the indices of the dragged and target habits
+                        const draggedType = draggedElement.getAttribute('data-habit-type');
+                        const targetType = this.getAttribute('data-habit-type');
+                        
+                        const draggedIndex = habits.findIndex(h => h.type === draggedType);
+                        const targetIndex = habits.findIndex(h => h.type === targetType);
+                        
+                        if (draggedIndex !== -1 && targetIndex !== -1) {
+                            // Reorder in the habits array
+                            const [movedHabit] = habits.splice(draggedIndex, 1);
+                            habits.splice(targetIndex, 0, movedHabit);
+                            
+                            // Save to localStorage after reordering
+                            saveToLocalStorage();
+                            
+                            // Update the UI
+                            updateCalendar();
+                            updateHabitGraph(); // Update graph after reordering habits
+                        }
+                    }
+                });
+                
+                // Add mousedown/touchstart for long press detection on mobile
+                let pressTimer;
+                let isDragging = false;
+                
+                habitRow.addEventListener('mousedown', function(e) {
+                    if (e.target.classList.contains('habit-name') || 
+                        e.target.classList.contains('delete-habit')) {
+                        return; // Don't start drag if clicking on editable name or delete button
+                    }
+                    
+                    pressTimer = setTimeout(() => {
+                        isDragging = true;
+                        // Visual feedback that we're dragging
+                        this.classList.add('dragging');
+                    }, 500); // Long press threshold
+                });
+                
+                habitRow.addEventListener('mousemove', function(e) {
+                    if (isDragging) {
+                        // Handle manual dragging here if needed
+                    }
+                });
+                
+                habitRow.addEventListener('mouseup', function() {
+                    clearTimeout(pressTimer);
+                    if (isDragging) {
+                        this.classList.remove('dragging');
+                        isDragging = false;
+                    }
+                });
+                
+                habitRow.addEventListener('mouseleave', function() {
+                    clearTimeout(pressTimer);
+                    if (isDragging) {
+                        this.classList.remove('dragging');
+                        isDragging = false;
+                    }
+                });
+            }
+            
+            // Function to update graph habit select options
+            function updateGraphHabitSelect() {
+                // Clear existing options except "All Habits"
+                while (graphHabitSelect.options.length > 1) {
+                    graphHabitSelect.remove(1);
+                }
+                
+                // Add an option for each habit
+                habits.forEach(habit => {
+                    const option = document.createElement('option');
+                    option.value = habit.type;
+                    option.textContent = habit.name;
+                    graphHabitSelect.appendChild(option);
+                });
+            }
+            
+            // Function to update the habit graph
+            function updateHabitGraph() {
+                const selectedHabit = graphHabitSelect.value;
+                const selectedPeriod = graphPeriodSelect.value;
+                
+                // Get date range based on selected period
+                const endDate = new Date(currentDate);
+                const startDate = new Date(currentDate);
+                
+                if (selectedPeriod === 'week') {
+                    startDate.setDate(endDate.getDate() - 6); // Last 7 days
+                } else if (selectedPeriod === 'month') {
+                    startDate.setDate(1); // Start of current month
+                    // Set endDate to the last day of the current month
+                    endDate.setMonth(endDate.getMonth() + 1);
+                    endDate.setDate(0);
+                } else if (selectedPeriod === '3months') {
+                    startDate.setMonth(endDate.getMonth() - 2);
+                    startDate.setDate(1); // Start of 3 months ago
+                    // Set endDate to the last day of the current month
+                    endDate.setMonth(endDate.getMonth() + 1);
+                    endDate.setDate(0);
+                }
+                
+                // Generate dates array
+                const dates = [];
+                const currentDateCopy = new Date(startDate);
+                
+                while (currentDateCopy <= endDate) {
+                    dates.push(new Date(currentDateCopy));
+                    currentDateCopy.setDate(currentDateCopy.getDate() + 1);
+                }
+                
+                // Prepare data for the chart
+                const labels = dates.map(date => {
+                    return `${date.getDate()}/${date.getMonth() + 1}`;
+                });
+                
+                let datasets = [];
+                
+                if (selectedHabit === 'all') {
+                    // Show actual count of completed habits
+                    const data = dates.map(date => {
+                        let completedCount = 0;
+                        
+                        habits.forEach(habit => {
+                            const dateKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-${habit.type}`;
+                            if (completedDays[dateKey] === true) {
+                                completedCount++;
+                            }
+                        });
+                        
+                        return completedCount;
+                    });
+                    
+                    datasets.push({
+                        label: 'Completed Habits',
+                        data: data,
+                        borderColor: isDarkMode ? '#818cf8' : '#4f46e5',
+                        backgroundColor: isDarkMode ? 'rgba(129, 140, 248, 0.2)' : 'rgba(79, 70, 229, 0.2)',
+                        fill: true,
+                        tension: 0.3
+                    });
+                } else {
+                    // Show completion for a specific habit (0 or 1)
+                    const habitIndex = habits.findIndex(h => h.type === selectedHabit);
+                    if (habitIndex !== -1) {
+                        const habit = habits[habitIndex];
+                        const data = dates.map(date => {
+                            const dateKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-${habit.type}`;
+                            return completedDays[dateKey] === true ? 1 : 0;
+                        });
+                        
+                        // Determine color based on habit type
+                        let borderColor, backgroundColor;
+                        if (habit.type === 'vocab') {
+                            borderColor = isDarkMode ? '#fbbf24' : '#f59e0b';
+                            backgroundColor = isDarkMode ? 'rgba(251, 191, 36, 0.2)' : 'rgba(245, 158, 11, 0.2)';
+                        } else if (habit.type === 'meditation') {
+                            borderColor = isDarkMode ? '#34d399' : '#10b981';
+                            backgroundColor = isDarkMode ? 'rgba(52, 211, 153, 0.2)' : 'rgba(16, 185, 129, 0.2)';
+                        } else if (habit.type === 'gaming') {
+                            borderColor = isDarkMode ? '#3b82f6' : '#2563eb';
+                            backgroundColor = isDarkMode ? 'rgba(59, 130, 246, 0.2)' : 'rgba(37, 99, 235, 0.2)';
+                        } else {
+                            borderColor = isDarkMode ? '#818cf8' : '#4f46e5';
+                            backgroundColor = isDarkMode ? 'rgba(129, 140, 248, 0.2)' : 'rgba(79, 70, 229, 0.2)';
+                        }
+                        
+                        datasets.push({
+                            label: habit.name,
+                            data: data,
+                            borderColor: borderColor,
+                            backgroundColor: backgroundColor,
+                            fill: true,
+                            tension: 0.3
+                        });
+                    }
+                }
+                
+                // Create or update chart
+                if (habitChart) {
+                    habitChart.data.labels = labels;
+                    habitChart.data.datasets = datasets;
+                    habitChart.options.scales.y.max = selectedHabit === 'all' ? habits.length : 1;
+                    habitChart.options.scales.y.ticks.stepSize = 1;
+                    habitChart.update();
+                } else {
+                    habitChart = new Chart(habitGraphCanvas, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: datasets
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: selectedHabit === 'all' ? habits.length : 1,
+                                    ticks: {
+                                        stepSize: 1,
+                                        precision: 0,
+                                        callback: function(value) {
+                                            return value;
+                                        },
+                                        color: isDarkMode ? '#f9fafb' : '#333'
+                                    },
+                                    grid: {
+                                        color: isDarkMode ? 'rgba(75, 85, 99, 0.3)' : 'rgba(229, 231, 235, 0.8)'
+                                    }
+                                },
+                                x: {
+                                    ticks: {
+                                        color: isDarkMode ? '#f9fafb' : '#333'
+                                    },
+                                    grid: {
+                                        color: isDarkMode ? 'rgba(75, 85, 99, 0.3)' : 'rgba(229, 231, 235, 0.8)'
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    labels: {
+                                        color: isDarkMode ? '#f9fafb' : '#333'
+                                    }
+                                },
+                                tooltip: {
+                                    backgroundColor: isDarkMode ? '#374151' : 'rgba(255, 255, 255, 0.9)',
+                                    titleColor: isDarkMode ? '#f9fafb' : '#333',
+                                    bodyColor: isDarkMode ? '#f9fafb' : '#333',
+                                    borderColor: isDarkMode ? '#4b5563' : '#e5e7eb',
+                                    borderWidth: 1
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+            
+            // Add event listeners for graph controls
+            graphHabitSelect.addEventListener('change', updateHabitGraph);
+            graphPeriodSelect.addEventListener('change', updateHabitGraph);
+            
+            // Month navigation
+            prevMonthBtn.addEventListener('click', function() {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                updateCalendar();
+            });
+            
+            nextMonthBtn.addEventListener('click', function() {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                updateCalendar();
+            });
+            
+            // Add new habit functionality
+            const addHabitBtn = document.getElementById('add-habit-btn');
+            addHabitBtn.addEventListener('click', function() {
+                const habitName = prompt('Enter habit name:');
+                if (habitName) {
+                    // Create unique ID for the new habit
+                    const habitType = 'custom-' + Date.now();
+                    
+                    // Add to habits array
+                    habits.push({
+                        name: habitName,
+                        type: habitType
+                    });
+                    
+                    // Save to localStorage after adding new habit
+                    saveToLocalStorage();
+                    
+                    // Refresh the calendar to show the new habit
+                    updateCalendar();
+                    updateHabitGraph(); // Update graph after adding new habit
+                }
+            });
+            
+            // Load data from localStorage first, then initialize calendar
+            loadFromLocalStorage();
+            updateCalendar();
+        });
+    </script>
+</body>
+</html>
