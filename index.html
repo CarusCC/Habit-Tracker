@@ -536,11 +536,7 @@
             let currentDate = new Date(2025, 1, 1); // Month is 0-indexed in JS Date
             
             // Initial habit data (will be overridden by localStorage if available)
-            let habits = [
-                { name: 'Vocabulary before 7:30am', type: 'vocab' },
-                { name: 'Meditation', type: 'meditation' },
-                { name: 'No gaming', type: 'gaming' }
-            ];
+            let habits = [];
             
             // Initialize completed days (empty for now, will be loaded from localStorage)
             let completedDays = {};
