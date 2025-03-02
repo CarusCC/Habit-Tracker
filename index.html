@@ -745,25 +745,41 @@
                             habitCell.setAttribute('title', 'Double-click to view/edit note');
                         }
                         
-                        // Add click event to toggle completion
+                        // Variables for click handling
+                        let clickTimer = null;
+                        let isDoubleClick = false;
+                        
+                        // Add click event with delay to distinguish between single and double clicks
                         habitCell.addEventListener('click', function(e) {
-                            // Left click for completed
-                            this.classList.remove('crossed');
-                            if (this.classList.contains('completed')) {
-                                this.classList.remove('completed');
-                                completedDays[dateKey] = false;
-                            } else {
-                                this.classList.add('completed');
-                                completedDays[dateKey] = true;
+                            // If this is part of a double-click, don't process the single click
+                            if (isDoubleClick) {
+                                isDoubleClick = false;
+                                return;
                             }
-                            saveToLocalStorage(); // Save after changing completion status
-                            updateHeatMap(); // Update heat map after changing status
-                            updateHabitGraph(); // Update graph after changing status
+                            
+                            // Set a timer to wait and see if this is a double click
+                            clearTimeout(clickTimer);
+                            clickTimer = setTimeout(() => {
+                                // This is a confirmed single click - toggle completion
+                                this.classList.remove('crossed');
+                                if (this.classList.contains('completed')) {
+                                    this.classList.remove('completed');
+                                    completedDays[dateKey] = false;
+                                } else {
+                                    this.classList.add('completed');
+                                    completedDays[dateKey] = true;
+                                }
+                                saveToLocalStorage();
+                                updateHeatMap();
+                                updateHabitGraph();
+                            }, 250); // 250ms delay to wait for potential double click
                         });
                         
                         // Add right-click event for crossed
                         habitCell.addEventListener('contextmenu', function(e) {
                             e.preventDefault(); // Prevent context menu
+                            clearTimeout(clickTimer); // Clear any pending single-click
+                            
                             this.classList.remove('completed');
                             if (this.classList.contains('crossed')) {
                                 this.classList.remove('crossed');
@@ -774,13 +790,21 @@
                             }
                             saveToLocalStorage();
                             updateHeatMap();
-                            updateHabitGraph(); // Update graph after changing status
+                            updateHabitGraph();
                         });
                         
                         // Add double-click event for notes
                         habitCell.addEventListener('dblclick', function(e) {
                             e.stopPropagation();
                             e.preventDefault();
+                            
+                            // Mark as double click to prevent the single click from firing
+                            isDoubleClick = true;
+                            
+                            // Clear any pending single-click timer
+                            clearTimeout(clickTimer);
+                            
+                            // Show the note editor
                             showNoteEditor(dateKey, this);
                         });
                         
