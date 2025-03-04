@@ -449,6 +449,23 @@
         canvas {
             background-color: var(--bg-color);
         }
+        
+        /* Add week grouping styles */
+        .header-cell.week-start {
+            border-left: 3px solid var(--border-color);
+        }
+        
+        .header-cell.week-end {
+            border-right: 3px solid var(--border-color);
+        }
+        
+        .habit-cell.week-start {
+            border-left: 3px solid var(--border-color);
+        }
+        
+        .habit-cell.week-end {
+            border-right: 3px solid var(--border-color);
+        }
     </style>
 </head>
 <body>
@@ -630,6 +647,10 @@
                 const emptyHeaderCell = document.createElement('div');
                 emptyHeaderCell.className = 'header-cell';
                 emptyHeaderCell.textContent = 'Habits';
+                const firstDayOfMonth = new Date(year, month, 1).getDay();
+                if (firstDayOfMonth === 1) { // 1 is Monday
+                    emptyHeaderCell.classList.add('week-start');
+                }
                 headerRow.appendChild(emptyHeaderCell);
                 
                 // Add combined day headers with heat map
@@ -640,6 +661,12 @@
                     const isToday = today.getMonth() === month && 
                                    today.getFullYear() === year && 
                                    today.getDate() === dayNumber;
+                    
+                    // Week grouping logic
+                    const isMonday = weekdayIndex === 1;
+                    const isSunday = weekdayIndex === 0;
+                    const isFirstDay = i === 0;
+                    const isLastDay = i === daysInMonth - 1;
                     
                     // Count completed habits for heat map
                     let completedCount = 0;
@@ -686,6 +713,15 @@
                     
                     const headerCell = document.createElement('div');
                     headerCell.className = `header-cell day-cell${isToday ? ' today' : ''}`;
+                    
+                    // Only add week-start if it's Monday or first day of month that's not in middle of week
+                    if (isMonday || (isFirstDay && firstDayOfMonth === 1)) {
+                        headerCell.classList.add('week-start');
+                    }
+                    // Only add week-end if it's Sunday and not the last day
+                    if (isSunday && !isLastDay) {
+                        headerCell.classList.add('week-end');
+                    }
                     headerCell.style.backgroundColor = backgroundColor;
                     
                     // Add weekday
@@ -718,6 +754,9 @@
                     // Add habit name cell with delete button
                     const habitNameContainer = document.createElement('div');
                     habitNameContainer.className = 'habit-name-container';
+                    if (firstDayOfMonth === 1) {
+                        habitNameContainer.classList.add('week-start');
+                    }
                     
                     const habitNameElement = document.createElement('div');
                     habitNameElement.className = 'habit-name';
@@ -778,6 +817,22 @@
                         if (habitNotes[dateKey]) {
                             habitCell.classList.add('has-note');
                             habitCell.setAttribute('title', 'Double-click to view/edit note');
+                        }
+                        
+                        // Inside the habit cells creation loop, update week grouping classes
+                        const dayDate = new Date(year, month, dayNumber);
+                        const weekdayIndex = dayDate.getDay();
+                        const isMonday = weekdayIndex === 1;
+                        const isSunday = weekdayIndex === 0;
+                        const isFirstDay = dayNumber === 1;
+                        const isLastDay = dayNumber === daysInMonth;
+
+                        habitCell.className = `habit-cell ${habit.type}-cell day-cell`;
+                        if (isMonday || (isFirstDay && firstDayOfMonth === 1)) {
+                            habitCell.classList.add('week-start');
+                        }
+                        if (isSunday && !isLastDay) {
+                            habitCell.classList.add('week-end');
                         }
                         
                         // Click handling
