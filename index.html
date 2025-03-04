@@ -218,6 +218,7 @@
             transform: translate(-50%, -50%);
             color: var(--success-color);
             font-size: 1.25rem;
+            font-weight: bold;
         }
         
         .crossed {
@@ -232,49 +233,67 @@
             transform: translate(-50%, -50%);
             color: #ef4444;
             font-size: 1.25rem;
+            opacity: 0.9;
         }
         
         .vocab-cell.completed {
-            background-color: var(--vocab-color);
+            background-color: rgba(254, 243, 199, 0.5);  /* Soft highlighter yellow */
         }
         
         .meditation-cell.completed {
-            background-color: var(--meditation-color);
+            background-color: rgba(167, 243, 208, 0.5);  /* Soft highlighter green */
         }
         
         .gaming-cell.completed {
-            background-color: var(--gaming-color);
+            background-color: rgba(191, 219, 254, 0.5);  /* Soft highlighter blue */
         }
         
+        /* Custom cell colors - using highlighter-like colors */
         .custom-cell-1.completed {
-            background-color: #bfdbfe;
+            background-color: rgba(216, 180, 254, 0.5);  /* Soft highlighter purple */
         }
         
         .custom-cell-2.completed {
-            background-color: #c7d2fe;
+            background-color: rgba(253, 186, 116, 0.5);  /* Soft highlighter orange */
         }
         
         .custom-cell-3.completed {
-            background-color: #ddd6fe;
+            background-color: rgba(153, 246, 228, 0.5);  /* Soft highlighter teal */
         }
         
         .custom-cell-4.completed {
-            background-color: #fbcfe8;
+            background-color: rgba(252, 165, 165, 0.5);  /* Soft highlighter coral */
         }
         
         .custom-cell-5.completed {
-            background-color: #fecaca;
+            background-color: rgba(199, 210, 254, 0.5);  /* Soft highlighter indigo */
+        }
+        
+        .custom-cell-6.completed {
+            background-color: rgba(252, 211, 77, 0.5);   /* Soft highlighter amber */
+        }
+        
+        .custom-cell-7.completed {
+            background-color: rgba(209, 250, 229, 0.5);  /* Soft highlighter mint */
+        }
+        
+        .custom-cell-8.completed {
+            background-color: rgba(251, 207, 232, 0.5);  /* Soft highlighter pink */
+        }
+        
+        .custom-cell-9.completed {
+            background-color: rgba(187, 247, 208, 0.5);  /* Soft highlighter lime */
+        }
+        
+        .custom-cell-10.completed {
+            background-color: rgba(224, 231, 255, 0.5);  /* Soft highlighter lavender */
         }
         
         .vocab-cell.crossed,
         .meditation-cell.crossed,
         .gaming-cell.crossed,
-        .custom-cell-1.crossed,
-        .custom-cell-2.crossed,
-        .custom-cell-3.crossed,
-        .custom-cell-4.crossed,
-        .custom-cell-5.crossed {
-            background-color: rgba(239, 68, 68, 0.2);
+        [class*="custom-cell-"].crossed {
+            background-color: rgba(239, 68, 68, 0.15);  /* Very light red for crossed state */
         }
         
         .today {
@@ -803,7 +822,7 @@
                         const habitCell = document.createElement('div');
                         habitCell.className = `habit-cell ${habit.type}-cell day-cell`;
                         if (habit.type.startsWith('custom-')) {
-                            const customIndex = (index % 5) + 1;
+                            const customIndex = (index % 10) + 1;  // Cycle through 10 colors instead of 5
                             habitCell.classList.add(`custom-cell-${customIndex}`);
                         }
                         habitCell.setAttribute('data-date', dateKey);
