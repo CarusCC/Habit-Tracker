@@ -827,7 +827,7 @@
                         const isFirstDay = dayNumber === 1;
                         const isLastDay = dayNumber === daysInMonth;
 
-                        habitCell.className = `habit-cell ${habit.type}-cell day-cell`;
+                        // Add week grouping classes without overwriting existing ones
                         if (isMonday || (isFirstDay && firstDayOfMonth === 1)) {
                             habitCell.classList.add('week-start');
                         }
