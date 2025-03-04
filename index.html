@@ -3,211 +3,336 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DailyHabits</title>
+    <title>HabitTracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #4f46e5;
-            --light-gray: #f3f4f6;
-            --border-color: #e5e7eb;
-            --success-color: #10b981;
-            --meditation-color: #a7f3d0;
-            --vocab-color: #fef3c7;
-            --gaming-color: #dbeafe;
+            --primary-color: #0071e3;
+            --primary-light: #42a5f5;
+            --primary-gradient: linear-gradient(135deg, #0071e3, #42a5f5);
+            --light-gray: #f5f5f7;
+            --border-color: #d2d2d7;
+            --success-color: #34c759;
+            --meditation-color: #e3f8e9;
+            --vocab-color: #fef9c3;
+            --gaming-color: #e3f2fd;
             --bg-color: #ffffff;
-            --text-color: #333;
-            --cell-hover-color: #f9fafb;
+            --text-color: #1d1d1f;
+            --text-light: #86868b;
+            --cell-hover-color: #f5f5f7;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 6px 12px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.12);
+            --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+            --shadow-button: 0 2px 8px rgba(0, 113, 227, 0.3);
+            --radius-sm: 0.5rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+            --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
         }
         
         [data-theme="dark"] {
-            --primary-color: #818cf8;
-            --light-gray: #374151;
-            --border-color: #4b5563;
-            --success-color: #34d399;
-            --meditation-color: #059669;
-            --vocab-color: #fbbf24;
-            --gaming-color: #3b82f6;
-            --bg-color: #111827;
-            --text-color: #f9fafb;
-            --cell-hover-color: #1f2937;
+            --primary-color: #0a84ff;
+            --primary-light: #64b5f6;
+            --primary-gradient: linear-gradient(135deg, #0a84ff, #64b5f6);
+            --light-gray: #1c1c1e;
+            --border-color: #38383a;
+            --success-color: #30d158;
+            --meditation-color: #0d3d29;
+            --vocab-color: #3a3000;
+            --gaming-color: #0a253e;
+            --bg-color: #000000;
+            --text-color: #f5f5f7;
+            --text-light: #98989d;
+            --cell-hover-color: #1c1c1e;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+            --shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+            --shadow-md: 0 6px 12px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.35);
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            font-family: var(--font-sans);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            letter-spacing: -0.01em;
         }
         
         body {
             color: var(--text-color);
             background-color: var(--bg-color);
-            transition: background-color 0.3s, color 0.3s;
+            transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+            line-height: 1.5;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(at 100% 0%, rgba(0, 113, 227, 0.03) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(0, 113, 227, 0.03) 0px, transparent 50%);
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) var(--light-gray);
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        [data-theme="dark"] .header {
+            background-color: var(--bg-color);
         }
         
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 2rem;
+            padding: 1.25rem 2.5rem;
             border-bottom: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
         }
         
         .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
+            font-size: 1.75rem;
+            font-weight: 600;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.03em;
+            transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
         
         .theme-toggle {
-            width: 1.5rem;
-            height: 1.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
             border-radius: 50%;
-            background-color: transparent;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+            font-size: 1.1rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-light);
         }
         
         .month-nav {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 1rem;
-            padding: 1.5rem 0;
+            gap: 2rem;
+            padding: 3rem 0 2rem;
+            background-color: transparent;
         }
         
         .month-display {
-            font-size: 1.25rem;
-            font-weight: 500;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-color);
+            min-width: 280px;
+            text-align: center;
+            letter-spacing: -0.03em;
         }
         
         .nav-btn {
-            background: none;
-            border: none;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
             cursor: pointer;
-            font-size: 1.25rem;
+            font-size: 1.1rem;
+            width: 3rem;
+            height: 3rem;
+            color: var(--text-color);
+            transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-btn:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: var(--shadow-button);
         }
         
         .calendar {
-            margin: 0 auto;
-            max-width: 100%;
-            border: 1px solid var(--border-color);
-            border-radius: 0.375rem;
+            margin: 0 2.5rem 2.5rem;
+            border-radius: var(--radius-lg);
             background-color: var(--bg-color);
+            box-shadow: var(--shadow-lg);
+            border: 0.5px solid var(--border-color);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
-        
+
         .calendar-inner {
-            width: 100%;
+            width: max-content;
+            min-width: 100%;
             display: table;
             table-layout: fixed;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
+            background-color: var(--bg-color);
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+            outline: none;
+            border: none;
+            -webkit-tap-highlight-color: transparent;
+            /* Fix scrollbar issues */
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) var(--light-gray);
+        }
+
+        /* Fix for Safari scrollbar issues */
+        .calendar-inner::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .calendar-inner::-webkit-scrollbar-track {
+            background: var(--light-gray);
+            border-radius: 3px;
+        }
+
+        .calendar-inner::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 3px;
         }
         
         .calendar-header {
             display: table-row;
+            background-color: var(--light-gray);
         }
         
         .header-cell {
             display: table-cell;
-            padding: 0.25rem 0.5rem;
+            padding: 0.5rem;
             text-align: center;
-            border-right: 1px solid var(--border-color);
-            border-bottom: 1px solid var(--border-color);
-            font-weight: normal;
-            font-size: 0.875rem;
-            background-color: var(--bg-color);
+            border: 0.5px solid var(--border-color);
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.02em;
+            background-color: var(--light-gray);
+            transition: all 0.2s ease;
+            vertical-align: middle;
+            width: 40px;
+            min-width: 40px;
+            height: 45px;
+            color: var(--text-light);
             position: relative;
         }
         
         .header-cell:first-child {
-            width: 200px;
+            width: 220px;
+            min-width: 220px;
             text-align: left;
-        }
-        
-        .header-cell .weekday {
-            margin-bottom: 0.25rem;
-        }
-        
-        .header-cell .date {
-            margin-top: 0.25rem;
-        }
-        
-        /* Remove the old heat level classes as we'll generate colors dynamically in JavaScript */
-        .header-cell[style*="background-color"] {
-            transition: background-color 0.3s ease;
-        }
-        
-        .day-number {
-            padding: 0.75rem 0.5rem;
-            text-align: center;
-            border-bottom: 1px solid var(--border-color);
-            border-right: 1px solid var(--border-color);
-            font-size: 0.875rem;
-        }
-        
-        .habits-title {
-            padding: 0.75rem;
-            text-align: center;
-            border-right: 1px solid var(--border-color);
-            border-bottom: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            background-color: var(--bg-color);
+            font-weight: 700;
             color: var(--primary-color);
-            font-weight: bold;
+            border-top: none;
+            font-size: 1rem;
+            position: sticky;
+            left: 0;
+            z-index: 2;
         }
         
         .habit-row {
             display: table-row;
-            cursor: move;
+            background-color: var(--bg-color);
+            transition: all 0.2s ease;
+            /* Prevent any blue outline */
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
         
         .habit-name-container {
             display: table-cell;
-            padding: 1rem;
-            border-right: 1px solid var(--border-color);
-            border-bottom: 1px solid var(--border-color);
-            width: 200px;
-            position: relative;
-        }
-        
-        .habit-name {
-            cursor: text;
-            width: calc(100% - 30px);
-            display: inline-block;
-        }
-        
-        .habit-name:hover {
-            background-color: var(--cell-hover-color);
-        }
-        
-        .delete-habit {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #ef4444;
-            cursor: pointer;
-            font-size: 1.25rem;
-            opacity: 0.6;
-            transition: opacity 0.2s;
-        }
-        
-        .delete-habit:hover {
-            opacity: 1;
+            padding: 0.5rem 1rem;
+            border: 0.5px solid var(--border-color);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+            background-color: var(--bg-color);
+            width: 220px;
+            min-width: 220px;
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
         
         .habit-cell {
             display: table-cell;
-            border-right: 1px solid var(--border-color);
-            border-bottom: 1px solid var(--border-color);
-            cursor: pointer;
+            padding: 0.5rem;
+            border: 0.5px solid var(--border-color);
             text-align: center;
             vertical-align: middle;
-            height: 50px;
+            transition: all 0.2s ease;
             position: relative;
+            background-color: var(--bg-color);
+            width: 40px;
+            min-width: 40px;
+            height: 45px;
+            cursor: pointer;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .habit-cell:hover {
+            background-color: var(--cell-hover-color);
+            transform: scale(1.05);
+            z-index: 1;
+            box-shadow: var(--shadow-md);
+            /* Ensure no blue outline appears on hover */
+            outline: none !important;
+            border-color: var(--border-color) !important;
+        }
+
+        .day-cell {
+            width: 40px;
+            min-width: 40px;
+            height: 45px;
+            position: relative;
+        }
+
+        .weekday {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            margin-bottom: 0.15rem;
+            line-height: 1;
+            font-weight: 500;
+        }
+
+        .date {
+            font-size: 0.9rem;
+            font-weight: 600;
+            line-height: 1;
+            color: var(--text-color);
         }
         
         .completed {
             position: relative;
+            background-color: var(--bg-color);
         }
         
         .completed::after {
@@ -219,10 +344,19 @@
             color: var(--success-color);
             font-size: 1.25rem;
             font-weight: bold;
+            opacity: 0;
+            animation: checkmark 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes checkmark {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
+            100% { opacity: 0.9; transform: translate(-50%, -50%) scale(1); }
         }
         
         .crossed {
             position: relative;
+            background-color: var(--bg-color);
         }
         
         .crossed::after {
@@ -233,263 +367,497 @@
             transform: translate(-50%, -50%);
             color: #ef4444;
             font-size: 1.25rem;
-            opacity: 0.9;
+            opacity: 0;
+            animation: crossmark 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes crossmark {
+            0% { opacity: 0; transform: translate(-50%, -50%) rotate(-45deg) scale(0.5); }
+            50% { opacity: 1; transform: translate(-50%, -50%) rotate(0deg) scale(1.3); }
+            100% { opacity: 0.7; transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+        }
+
+        .header-cell.week-start,
+        .habit-cell.week-start,
+        .habit-name-container.week-start {
+            border-left: 1px solid var(--border-color);
         }
         
-        .vocab-cell.completed {
-            background-color: rgba(254, 243, 199, 0.5);  /* Soft highlighter yellow */
+        .header-cell.week-end,
+        .habit-cell.week-end {
+            border-right: 1px solid var(--border-color);
         }
-        
-        .meditation-cell.completed {
-            background-color: rgba(167, 243, 208, 0.5);  /* Soft highlighter green */
-        }
-        
-        .gaming-cell.completed {
-            background-color: rgba(191, 219, 254, 0.5);  /* Soft highlighter blue */
-        }
-        
-        /* Custom cell colors - using highlighter-like colors */
-        .custom-cell-1.completed {
-            background-color: rgba(216, 180, 254, 0.5);  /* Soft highlighter purple */
-        }
-        
-        .custom-cell-2.completed {
-            background-color: rgba(253, 186, 116, 0.5);  /* Soft highlighter orange */
-        }
-        
-        .custom-cell-3.completed {
-            background-color: rgba(153, 246, 228, 0.5);  /* Soft highlighter teal */
-        }
-        
-        .custom-cell-4.completed {
-            background-color: rgba(252, 165, 165, 0.5);  /* Soft highlighter coral */
-        }
-        
-        .custom-cell-5.completed {
-            background-color: rgba(199, 210, 254, 0.5);  /* Soft highlighter indigo */
-        }
-        
-        .custom-cell-6.completed {
-            background-color: rgba(252, 211, 77, 0.5);   /* Soft highlighter amber */
-        }
-        
-        .custom-cell-7.completed {
-            background-color: rgba(209, 250, 229, 0.5);  /* Soft highlighter mint */
-        }
-        
-        .custom-cell-8.completed {
-            background-color: rgba(251, 207, 232, 0.5);  /* Soft highlighter pink */
-        }
-        
-        .custom-cell-9.completed {
-            background-color: rgba(187, 247, 208, 0.5);  /* Soft highlighter lime */
-        }
-        
-        .custom-cell-10.completed {
-            background-color: rgba(224, 231, 255, 0.5);  /* Soft highlighter lavender */
-        }
-        
-        .vocab-cell.crossed,
-        .meditation-cell.crossed,
-        .gaming-cell.crossed,
-        [class*="custom-cell-"].crossed {
-            background-color: rgba(239, 68, 68, 0.15);  /* Very light red for crossed state */
-        }
-        
-        .today {
-            background-color: var(--light-gray);
-            color: var(--text-color);
-            font-weight: 600;
-            border-radius: 4px;
-            box-shadow: inset 0 0 0 1px var(--border-color);
-        }
-        
-        .add-habit-btn {
-            margin: 1rem;
-            padding: 0.5rem 1rem;
-            background: var(--bg-color);
+
+        .habit-note {
+            position: fixed;
+            background-color: var(--bg-color);
             border: 1px solid var(--border-color);
-            border-radius: 0.375rem;
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            width: 90%;
+            max-width: 1200px;
+            max-height: 90vh;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: var(--shadow-lg);
+            animation: fadeInScale 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .note-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 999;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .has-note::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 8px 8px 0;
+            border-color: transparent var(--primary-color) transparent transparent;
+            opacity: 0.8;
+            transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        .has-note:hover::before {
+            border-width: 0 10px 10px 0;
+            opacity: 1;
+        }
+
+        .note-actions {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .note-btn {
+            padding: 0.5rem 1.25rem;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 500;
             cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        .note-save {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+        }
+
+        .note-save:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-button);
+        }
+
+        .note-save:active {
+            filter: brightness(0.95);
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        .note-cancel {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .note-cancel:hover {
+            background-color: var(--cell-hover-color);
+            transform: translateY(-1px);
+        }
+
+        .note-cancel:active {
+            transform: translateY(0);
+        }
+
+        .habit-name {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            color: var(--text-color);
+            justify-content: space-between;
+            padding: 0.25rem;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+            margin-right: 2rem;
+        }
+
+        .habit-row.dragging {
+            opacity: 0.5;
+            background-color: var(--light-gray);
+            box-shadow: var(--shadow-lg);
         }
         
-        .habit-name-input {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid var(--border-color);
-            border-radius: 0.25rem;
-            font-size: 0.875rem;
+        .habit-row.drag-over {
+            border-top: 2px solid var(--primary-color);
+        }
+
+        .today {
+            position: relative;
+            font-weight: 600;
+        }
+
+        .today::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px solid var(--primary-color);
+            pointer-events: none;
+            animation: todayPulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+        }
+
+        @keyframes todayPulse {
+            0% { border-color: var(--primary-color); opacity: 1; }
+            50% { border-color: var(--primary-light); opacity: 0.6; }
+            100% { border-color: var(--primary-color); opacity: 1; }
         }
         
         .edit-mode {
             padding: 0.5rem;
         }
         
-        /* Added to ensure date columns are evenly sized */
-        .day-cell {
-            width: calc((100% - 200px) / 31); /* For up to 31 days in a month */
-        }
-        
-        /* Drag and drop styles */
-        .habit-row.dragging {
-            opacity: 0.5;
-            background-color: var(--light-gray);
-        }
-        
-        .habit-row.drag-over {
-            border-top: 2px solid var(--primary-color);
-        }
-        
-        .habit-note {
-            display: none;
-            position: absolute;
-            z-index: 10;
-            background-color: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 0.375rem;
-            padding: 0.5rem;
-            width: 200px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        
-        .note-textarea {
+        .habit-name-input {
             width: 100%;
-            min-height: 80px;
-            border: 1px solid var(--border-color);
-            border-radius: 0.25rem;
-            padding: 0.5rem;
-            font-size: 0.875rem;
+            padding: 0.875rem 1.25rem;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
             background-color: var(--bg-color);
             color: var(--text-color);
+            box-shadow: var(--shadow-inner);
+        }
+
+        .habit-name-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px var(--primary-light);
         }
         
-        /* Heat map styles */
-        .heat-map-container {
-            margin: 1rem;
-            padding: 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 0.375rem;
-            background-color: var(--bg-color);
-        }
-        
-        .heat-map-title {
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
-            color: var(--text-color);
-        }
-        
-        .heat-map {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.25rem;
-        }
-        
-        .heat-map-day {
-            width: 20px;
-            height: 20px;
-            border-radius: 2px;
+        .add-habit-btn {
+            margin: 0 2.5rem 2rem;
+            padding: 0.875rem 1.75rem;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 1rem;
             cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+            box-shadow: var(--shadow-button);
+            letter-spacing: -0.01em;
         }
-        
-        .heat-level-0 {
-            background-color: var(--border-color);
+
+        .add-habit-btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: var(--shadow-lg);
+            filter: brightness(1.05);
         }
-        
-        .heat-level-1 {
-            background-color: rgba(16, 185, 129, 0.2);
+
+        .add-habit-btn:active {
+            transform: translateY(0) scale(0.98);
+            filter: brightness(0.95);
+            box-shadow: var(--shadow-sm);
         }
-        
-        .heat-level-2 {
-            background-color: rgba(16, 185, 129, 0.4);
+
+        .graph-container {
+            margin: 3rem 2.5rem;
+            padding: 2.5rem;
+            border-radius: var(--radius-lg);
+            background-color: var(--bg-color);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
-        
-        .heat-level-3 {
-            background-color: rgba(16, 185, 129, 0.6);
+
+        .graph-container:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg), 0 0 0 1px var(--primary-light);
         }
-        
-        .heat-level-4 {
-            background-color: rgba(16, 185, 129, 0.8);
+
+        .graph-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
         }
-        
-        .heat-level-5 {
-            background-color: rgba(16, 185, 129, 1);
+
+        .graph-select {
+            padding: 0.875rem 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 0.95rem;
+            transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+            margin-right: 1rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
         }
-        
-        /* Note indicator styles */
-        .has-note::before {
-            content: "📝";
+
+        .graph-select:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .graph-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px var(--primary-light);
+        }
+
+        .delete-habit {
             position: absolute;
-            top: 2px;
-            right: 2px;
-            font-size: 0.7rem;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            font-size: 1.25rem;
+            color: #ef4444;
+            width: 1.75rem;
+            height: 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            background-color: transparent;
+        }
+
+        .habit-name-container:hover .delete-habit {
             opacity: 0.7;
         }
-        
-        /* Graph styles */
-        .graph-container {
-            margin: 1rem;
-            padding: 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 0.375rem;
-            background-color: var(--bg-color);
+
+        .delete-habit:hover {
+            opacity: 1 !important;
+            background-color: #fee2e2;
+            transform: translateY(-50%);
         }
-        
-        .graph-title {
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
+
+        .note-toolbar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            background-color: var(--bg-color);
+            z-index: 10;
+            padding-top: 0.5rem;
+        }
+
+        .note-toolbar button {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 0.4rem 0.6rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .note-toolbar button:hover {
+            background-color: var(--cell-hover-color);
+            border-color: var(--primary-light);
+            transform: translateY(-1px);
+        }
+
+        .note-toolbar button:active {
+            transform: translateY(0);
+        }
+
+        .note-toolbar button.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .note-toolbar .separator {
+            width: 1px;
+            height: 24px;
+            background-color: var(--border-color);
+            margin: 0 0.25rem;
+        }
+
+        .note-editor {
+            width: 100%;
+            height: calc(90vh - 10rem);
+            max-height: calc(90vh - 10rem);
+            padding: 1.5rem;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: all 0.2s ease;
+            font-family: inherit;
+            line-height: 1.6;
+            overflow-y: auto;
+            font-size: 1.125rem;
+            outline: none; /* Fix for focus outline issues */
+        }
+
+        .note-editor:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .note-templates {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .template-btn {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
             color: var(--text-color);
         }
-        
-        .graph-controls {
+
+        .template-btn:hover {
+            background-color: var(--cell-hover-color);
+            border-color: var(--primary-light);
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 200px;
+            margin: 0.5rem 0;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .habit-target {
+            display: flex;
+            align-items: center;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            max-width: 100%; /* Prevent overflow */
+            overflow: hidden; /* Prevent overflow */
+        }
+
+        .habit-target-bar {
+            height: 4px;
+            background-color: var(--border-color);
+            border-radius: 2px;
+            margin: 0 0.5rem;
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+            min-width: 50px; /* Ensure minimum width */
+        }
+
+        .habit-target-label {
+            white-space: nowrap;
+            overflow: hidden; /* Prevent overflow */
+            text-overflow: ellipsis; /* Show ellipsis for overflow */
+            max-width: 60px; /* Limit width */
+        }
+
+        .habit-has-target::after {
+            content: "🎯";
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .note-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
         }
-        
-        .graph-select {
-            padding: 0.5rem;
-            border: 1px solid var(--border-color);
-            border-radius: 0.25rem;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+
+        .note-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            flex-grow: 1;
+            margin-right: 1rem;
+        }
+
+        .note-date {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            white-space: nowrap;
+        }
+
+        .note-placeholder {
+            color: var(--text-light);
+            font-style: italic;
+            opacity: 0.7;
+        }
+
+        .note-toolbar-group {
+            display: flex;
+            gap: 0.25rem;
+            align-items: center;
         }
         
         .graph-canvas-container {
-            position: relative;
             height: 300px;
-            width: 100%;
+            margin-top: 1.5rem;
+            position: relative;
         }
         
-        canvas {
-            background-color: var(--bg-color);
-        }
-        
-        /* Add week grouping styles */
-        .header-cell.week-start {
-            border-left: 3px solid var(--border-color);
-        }
-        
-        .header-cell.week-end {
-            border-right: 3px solid var(--border-color);
-        }
-        
-        .habit-cell.week-start {
-            border-left: 3px solid var(--border-color);
-        }
-        
-        .habit-cell.week-end {
-            border-right: 3px solid var(--border-color);
-        }
+        /* Remove all tooltip, ripple effects and other potentially problematic styling */
     </style>
 </head>
 <body>
     <header class="header">
-        <div class="logo">DailyHabits</div>
+        <div class="logo">HabitTracker</div>
         <div class="theme-toggle" id="theme-toggle">
             <span id="theme-icon">🌙</span>
         </div>
@@ -500,6 +868,8 @@
         <div class="month-display">February, 2025</div>
         <button class="nav-btn" id="next-month">❯</button>
     </div>
+    
+    <button class="add-habit-btn" id="add-habit-btn">+ New Habit</button>
     
     <div class="calendar">
         <div class="calendar-inner" id="calendar-table">
@@ -524,8 +894,8 @@
             <canvas id="habit-graph"></canvas>
         </div>
     </div>
-    
-    <button class="add-habit-btn" id="add-habit-btn">+ New Habit</button>
+
+    <div id="tooltip" class="tooltip"></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -589,6 +959,9 @@
             // Initialize notes
             let habitNotes = {};
             
+            // Initialize habit targets
+            let habitTargets = {};
+            
             // Drag and drop variables
             let draggedElement = null;
             
@@ -599,6 +972,7 @@
                 const savedCurrentDate = localStorage.getItem('dailyHabits_currentDate');
                 const savedHabitNotes = localStorage.getItem('dailyHabits_habitNotes');
                 const savedDarkMode = localStorage.getItem('dailyHabits_darkMode');
+                const savedHabitTargets = localStorage.getItem('dailyHabits_habitTargets');
                 
                 if (savedHabits) {
                     habits = JSON.parse(savedHabits);
@@ -620,6 +994,10 @@
                     habitNotes = JSON.parse(savedHabitNotes);
                 }
                 
+                if (savedHabitTargets) {
+                    habitTargets = JSON.parse(savedHabitTargets);
+                }
+                
                 if (savedDarkMode) {
                     isDarkMode = savedDarkMode === 'true';
                     if (isDarkMode) {
@@ -635,6 +1013,7 @@
                 localStorage.setItem('dailyHabits_completedDays', JSON.stringify(completedDays));
                 localStorage.setItem('dailyHabits_currentDate', currentDate.toISOString());
                 localStorage.setItem('dailyHabits_habitNotes', JSON.stringify(habitNotes));
+                localStorage.setItem('dailyHabits_habitTargets', JSON.stringify(habitTargets));
                 localStorage.setItem('dailyHabits_darkMode', isDarkMode);
             }
             
@@ -649,8 +1028,22 @@
                 const month = currentDate.getMonth();
                 const today = new Date(); // Define today at the start
                 
-                // Update month/year display
-                monthDisplay.textContent = `${months[month]}, ${year}`;
+                // Update month/year display with animation
+                const oldText = monthDisplay.textContent;
+                const newText = `${months[month]}, ${year}`;
+                
+                if (oldText !== newText) {
+                    monthDisplay.style.opacity = '0';
+                    monthDisplay.style.transform = 'translateY(-10px)';
+                    
+                    setTimeout(() => {
+                        monthDisplay.textContent = newText;
+                        monthDisplay.style.opacity = '1';
+                        monthDisplay.style.transform = 'translateY(0)';
+                    }, 200);
+                } else {
+                    monthDisplay.textContent = newText;
+                }
                 
                 // Get total days in month
                 const daysInMonth = getDaysInMonth(year, month);
@@ -704,29 +1097,50 @@
                         const completionRate = completedCount / totalHabits;
                         
                         if (completionRate > 0) {
-                            // Use HSL for smooth color transition
+                            // Use HSL for smooth color transition with different values for dark mode
                             let hue, saturation, lightness, opacity;
                             
-                            if (completionRate <= 0.5) {
-                                // Red (0) to Yellow (60)
-                                hue = completionRate * 2 * 60;
-                                // Start with lighter red and transition to yellow
-                                lightness = 55 + (completionRate * 10); // 55-60% lightness
-                                saturation = 85 - (completionRate * 10); // Slightly desaturate towards yellow
+                            if (isDarkMode) {
+                                // Dark mode heat map colors - more subdued and natural
+                                if (completionRate <= 0.5) {
+                                    // Deep purple (260) to blue (210)
+                                    hue = 260 - (completionRate * 2 * 50);
+                                    lightness = 40 + (completionRate * 15); // 40-55% lightness
+                                    saturation = 70 - (completionRate * 10); // Slightly desaturate
+                                } else {
+                                    // Blue (210) to teal (180)
+                                    hue = 210 - (completionRate - 0.5) * 2 * 30;
+                                    lightness = 55 - ((completionRate - 0.5) * 10); // Slightly darker
+                                    saturation = 60 + ((completionRate - 0.5) * 20); // More saturated
+                                }
+                                // Opacity increases with completion but stays subtle
+                                opacity = 0.4 + (completionRate * 0.4);
                             } else {
-                                // Yellow (60) to Highlighter Green (95)
-                                hue = 60 + (completionRate - 0.5) * 2 * 35; // Max hue 95 instead of 120
-                                lightness = 60 - ((completionRate - 0.5) * 15); // Slightly darker for green
-                                saturation = 75 + ((completionRate - 0.5) * 20); // More saturated for green
+                                // Light mode heat map colors - original
+                                if (completionRate <= 0.5) {
+                                    // Red (0) to Yellow (60)
+                                    hue = completionRate * 2 * 60;
+                                    // Start with lighter red and transition to yellow
+                                    lightness = 55 + (completionRate * 10); // 55-60% lightness
+                                    saturation = 85 - (completionRate * 10); // Slightly desaturate towards yellow
+                                } else {
+                                    // Yellow (60) to Highlighter Green (95)
+                                    hue = 60 + (completionRate - 0.5) * 2 * 35; // Max hue 95 instead of 120
+                                    lightness = 60 - ((completionRate - 0.5) * 15); // Slightly darker for green
+                                    saturation = 75 + ((completionRate - 0.5) * 20); // More saturated for green
+                                }
+                                // Opacity increases with completion but stays subtle
+                                opacity = 0.35 + (completionRate * 0.45);
                             }
-                            
-                            // Opacity increases with completion but stays subtle
-                            opacity = 0.35 + (completionRate * 0.45);
                             
                             backgroundColor = `hsla(${hue}, ${saturation}%, ${lightness}%, ${opacity})`;
                         } else {
-                            // Lighter, softer red for no completion
-                            backgroundColor = 'hsla(0, 85%, 55%, 0.35)';
+                            // No completion color
+                            if (isDarkMode) {
+                                backgroundColor = 'hsla(350, 60%, 40%, 0.35)'; // Darker, more subdued red for dark mode
+                            } else {
+                                backgroundColor = 'hsla(0, 85%, 55%, 0.35)'; // Original light mode red
+                            }
                         }
                     }
                     
@@ -782,6 +1196,45 @@
                     habitNameElement.setAttribute('data-editable', 'true');
                     habitNameElement.textContent = habit.name;
                     habitNameContainer.appendChild(habitNameElement);
+                    
+                    // Add target indicator if habit has a target
+                    if (habitTargets[habit.type]) {
+                        const targetData = habitTargets[habit.type];
+                        const currentMonth = `${year}-${month}`;
+                        
+                        // Count completed days in current month
+                        let completedCount = 0;
+                        for (let i = 1; i <= daysInMonth; i++) {
+                            const dateKey = `${year}-${month}-${i}-${habit.type}`;
+                            if (completedDays[dateKey] === true) {
+                                completedCount++;
+                            }
+                        }
+                        
+                        // Calculate progress percentage
+                        const progressPercent = Math.min(100, (completedCount / targetData.target) * 100);
+                        
+                        // Create target progress bar
+                        const targetBar = document.createElement('div');
+                        targetBar.className = 'habit-target';
+                        
+                        const targetBarInner = document.createElement('div');
+                        targetBarInner.className = 'habit-target-bar';
+                        
+                        const targetProgress = document.createElement('div');
+                        targetProgress.className = 'habit-target-progress';
+                        targetProgress.style.width = `${progressPercent}%`;
+                        
+                        const targetLabel = document.createElement('div');
+                        targetLabel.className = 'habit-target-label';
+                        targetLabel.textContent = `${completedCount}/${targetData.target}`;
+                        
+                        targetBarInner.appendChild(targetProgress);
+                        targetBar.appendChild(targetBarInner);
+                        targetBar.appendChild(targetLabel);
+                        
+                        habitNameContainer.appendChild(targetBar);
+                    }
                     
                     // Add delete button
                     const deleteButton = document.createElement('span');
@@ -866,16 +1319,19 @@
                             
                             clearTimeout(clickTimer);
                             clickTimer = setTimeout(() => {
-                                this.classList.remove('crossed');
                                 if (this.classList.contains('completed')) {
                                     this.classList.remove('completed');
                                     completedDays[dateKey] = false;
                                 } else {
+                                    this.classList.remove('crossed');
                                     this.classList.add('completed');
                                     completedDays[dateKey] = true;
                                 }
+                                
+                                // Update heat map for this day
+                                updateHeatMapForDay(parseInt(year), parseInt(month), parseInt(dayNumber));
+                                
                                 saveToLocalStorage();
-                                updateCalendar();
                                 updateHabitGraph();
                             }, 250);
                         });
@@ -884,16 +1340,19 @@
                             e.preventDefault();
                             clearTimeout(clickTimer);
                             
-                            this.classList.remove('completed');
                             if (this.classList.contains('crossed')) {
                                 this.classList.remove('crossed');
                                 completedDays[dateKey] = false;
                             } else {
+                                this.classList.remove('completed');
                                 this.classList.add('crossed');
                                 completedDays[dateKey] = 'crossed';
                             }
+                            
+                            // Update heat map for this day
+                            updateHeatMapForDay(parseInt(year), parseInt(month), parseInt(dayNumber));
+                            
                             saveToLocalStorage();
-                            updateCalendar();
                             updateHabitGraph();
                         });
                         
@@ -917,62 +1376,289 @@
                 saveToLocalStorage();
             }
             
-            // Function to show note editor
+            // Function to show note editor with enhanced animations
             function showNoteEditor(dateKey, cell) {
-                // Remove any existing note editors
-                const existingNotes = document.querySelectorAll('.habit-note');
+                // Remove any existing note editors and overlays
+                const existingNotes = document.querySelectorAll('.habit-note, .note-overlay');
                 existingNotes.forEach(note => note.remove());
+                
+                // Parse the dateKey to get date information
+                const [year, month, day, habitType] = dateKey.split('-');
+                const dateObj = new Date(parseInt(year), parseInt(month), parseInt(day));
+                
+                // Find the habit name
+                const habit = habits.find(h => h.type === habitType);
+                const habitName = habit ? habit.name : 'Unknown Habit';
+                
+                // Format the date for display
+                const formattedDate = dateObj.toLocaleDateString(undefined, { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                
+                // Create overlay
+                const overlay = document.createElement('div');
+                overlay.className = 'note-overlay';
+                document.body.appendChild(overlay);
                 
                 // Create note container
                 const noteContainer = document.createElement('div');
                 noteContainer.className = 'habit-note';
-                noteContainer.style.display = 'block'; // Make sure it's visible
                 
-                // Create textarea
-                const textarea = document.createElement('textarea');
-                textarea.className = 'note-textarea';
-                textarea.placeholder = 'Add a note...';
+                // Create note header
+                const noteHeader = document.createElement('div');
+                noteHeader.className = 'note-header';
                 
-                // Load existing note if any
-                if (habitNotes[dateKey]) {
-                    textarea.value = habitNotes[dateKey];
+                const noteTitle = document.createElement('div');
+                noteTitle.className = 'note-title';
+                noteTitle.textContent = habitName;
+                
+                const noteDate = document.createElement('div');
+                noteDate.className = 'note-date';
+                noteDate.textContent = formattedDate;
+                
+                noteHeader.appendChild(noteTitle);
+                noteHeader.appendChild(noteDate);
+                
+                // Create toolbar
+                const toolbar = document.createElement('div');
+                toolbar.className = 'note-toolbar';
+                
+                // Text formatting group
+                const textFormatGroup = document.createElement('div');
+                textFormatGroup.className = 'note-toolbar-group';
+                
+                const formatButtons = [
+                    { command: 'bold', icon: '<b>B</b>', title: 'Bold (Ctrl+B)' },
+                    { command: 'italic', icon: '<i>I</i>', title: 'Italic (Ctrl+I)' },
+                    { command: 'underline', icon: '<u>U</u>', title: 'Underline (Ctrl+U)' }
+                ];
+                
+                formatButtons.forEach(btn => {
+                    const button = document.createElement('button');
+                    button.innerHTML = btn.icon;
+                    button.title = btn.title;
+                    button.addEventListener('click', () => {
+                        document.execCommand(btn.command, false);
+                        noteEditor.focus();
+                    });
+                    textFormatGroup.appendChild(button);
+                });
+                
+                toolbar.appendChild(textFormatGroup);
+                
+                // Add separator
+                const separator1 = document.createElement('div');
+                separator1.className = 'separator';
+                toolbar.appendChild(separator1);
+                
+                // Paragraph formatting group
+                const paraFormatGroup = document.createElement('div');
+                paraFormatGroup.className = 'note-toolbar-group';
+                
+                const headingButtons = [
+                    { command: 'formatBlock', value: 'H1', icon: 'H1', title: 'Heading 1' },
+                    { command: 'formatBlock', value: 'H3', icon: 'H3', title: 'Heading 3' }
+                ];
+                
+                headingButtons.forEach(btn => {
+                    const button = document.createElement('button');
+                    button.textContent = btn.icon;
+                    button.title = btn.title;
+                    button.addEventListener('click', () => {
+                        document.execCommand(btn.command, false, btn.value);
+                        noteEditor.focus();
+                    });
+                    paraFormatGroup.appendChild(button);
+                });
+                
+                toolbar.appendChild(paraFormatGroup);
+                
+                // Add separator
+                const separator2 = document.createElement('div');
+                separator2.className = 'separator';
+                toolbar.appendChild(separator2);
+                
+                // List formatting group
+                const listFormatGroup = document.createElement('div');
+                listFormatGroup.className = 'note-toolbar-group';
+                
+                const listButtons = [
+                    { command: 'insertUnorderedList', icon: '• List', title: 'Bullet List' },
+                    { command: 'insertOrderedList', icon: '1. List', title: 'Numbered List' }
+                ];
+                
+                listButtons.forEach(btn => {
+                    const button = document.createElement('button');
+                    button.textContent = btn.icon;
+                    button.title = btn.title;
+                    button.addEventListener('click', () => {
+                        document.execCommand(btn.command, false);
+                        noteEditor.focus();
+                    });
+                    listFormatGroup.appendChild(button);
+                });
+                
+                toolbar.appendChild(listFormatGroup);
+                
+                // Add separator
+                const separator3 = document.createElement('div');
+                separator3.className = 'separator';
+                toolbar.appendChild(separator3);
+                
+                // Add image upload button
+                const imageBtn = document.createElement('button');
+                imageBtn.innerHTML = '📷';
+                imageBtn.title = 'Insert Image';
+                
+                const imageInput = document.createElement('input');
+                imageInput.type = 'file';
+                imageInput.accept = 'image/*';
+                imageInput.style.display = 'none';
+                
+                imageBtn.addEventListener('click', () => {
+                    imageInput.click();
+                });
+                
+                imageInput.addEventListener('change', function() {
+                    if (this.files && this.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.className = 'image-preview';
+                            img.style.maxWidth = '100%'; // Ensure image fits in editor
+                            img.style.height = 'auto'; // Maintain aspect ratio
+                            document.execCommand('insertHTML', false, img.outerHTML);
+                        };
+                        reader.readAsDataURL(this.files[0]);
+                    }
+                });
+                
+                toolbar.appendChild(imageBtn);
+                noteContainer.appendChild(imageInput);
+                
+                // Create rich text editor
+                const noteEditor = document.createElement('div');
+                noteEditor.className = 'note-editor';
+                noteEditor.contentEditable = true;
+                
+                // Add placeholder text
+                if (!habitNotes[dateKey] || habitNotes[dateKey].trim() === '') {
+                    noteEditor.innerHTML = '<div class="note-placeholder">Write your notes here...</div>';
+                    noteEditor.addEventListener('focus', function() {
+                        if (this.querySelector('.note-placeholder')) {
+                            this.innerHTML = '';
+                        }
+                    });
+                } else {
+                    noteEditor.innerHTML = habitNotes[dateKey];
                 }
                 
-                // Add blur event to save note
-                textarea.addEventListener('blur', function() {
-                    if (this.value.trim()) {
-                        habitNotes[dateKey] = this.value.trim();
-                        cell.classList.add('has-note');
-                        cell.setAttribute('title', 'Double-click to view/edit note');
-                    } else {
-                        delete habitNotes[dateKey];
-                        cell.classList.remove('has-note');
-                        cell.removeAttribute('title');
-                    }
-                    saveToLocalStorage();
-                    noteContainer.remove();
-                });
+                // Create action buttons
+                const actions = document.createElement('div');
+                actions.className = 'note-actions';
                 
-                // Add keydown event to close on Escape
-                textarea.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape') {
-                        this.blur();
-                    }
-                });
+                const saveButton = document.createElement('button');
+                saveButton.className = 'note-btn note-save';
+                saveButton.textContent = 'Save';
                 
-                // Add textarea to container
-                noteContainer.appendChild(textarea);
+                const cancelButton = document.createElement('button');
+                cancelButton.className = 'note-btn note-cancel';
+                cancelButton.textContent = 'Cancel';
                 
-                // Position the note container
-                const cellRect = cell.getBoundingClientRect();
-                noteContainer.style.top = `${cellRect.bottom + window.scrollY + 5}px`;
-                noteContainer.style.left = `${cellRect.left + window.scrollX}px`;
+                actions.appendChild(cancelButton);
+                actions.appendChild(saveButton);
+                
+                // Add components to container
+                noteContainer.appendChild(noteHeader);
+                noteContainer.appendChild(toolbar);
+                noteContainer.appendChild(noteEditor);
+                noteContainer.appendChild(actions);
                 
                 // Add to document
                 document.body.appendChild(noteContainer);
                 
-                // Focus the textarea
-                textarea.focus();
+                // Save note function
+                function saveNote() {
+                    let value = noteEditor.innerHTML.trim();
+                    
+                    // Check if it's just the placeholder or empty
+                    if (value === '<div class="note-placeholder">Write your notes here...</div>' || 
+                        value === '' || value === '<br>' || value === '<div><br></div>') {
+                        delete habitNotes[dateKey];
+                        cell.classList.remove('has-note');
+                        cell.removeAttribute('title');
+                    } else {
+                        habitNotes[dateKey] = value;
+                        cell.classList.add('has-note');
+                        cell.setAttribute('title', 'Double-click to view/edit note');
+                    }
+                    saveToLocalStorage();
+                    closeNote();
+                }
+                
+                // Close note function
+                function closeNote() {
+                    noteContainer.remove();
+                    overlay.remove();
+                }
+                
+                // Add event listeners
+                saveButton.addEventListener('click', saveNote);
+                cancelButton.addEventListener('click', closeNote);
+                overlay.addEventListener('click', closeNote);
+                
+                // Handle keyboard shortcuts
+                noteEditor.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && e.ctrlKey) {
+                        saveNote();
+                    } else if (e.key === 'Escape') {
+                        closeNote();
+                    }
+                });
+                
+                // Focus the editor with improved cursor positioning
+                setTimeout(() => {
+                    noteEditor.focus();
+                    // Place cursor at the end if there's content
+                    if (habitNotes[dateKey] && !noteEditor.querySelector('.note-placeholder')) {
+                        // Create a proper range at the end of the content
+                        const range = document.createRange();
+                        const sel = window.getSelection();
+                        
+                        // Find the last text node or element
+                        let lastNode = noteEditor.lastChild;
+                        if (!lastNode) {
+                            // If empty, just put cursor at beginning
+                            range.setStart(noteEditor, 0);
+                            range.collapse(true);
+                        } else {
+                            // If the last node is an element (like a div or p)
+                            if (lastNode.nodeType === 1) {
+                                // If it has child nodes, go to the last one
+                                if (lastNode.lastChild) {
+                                    lastNode = lastNode.lastChild;
+                                }
+                            }
+                            
+                            // If it's a text node, put cursor at the end
+                            if (lastNode.nodeType === 3) {
+                                range.setStart(lastNode, lastNode.length);
+                                range.collapse(true);
+                            } else {
+                                // Otherwise, append after the element
+                                range.setStartAfter(lastNode);
+                                range.collapse(true);
+                            }
+                        }
+                        
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    }
+                }, 0);
             }
             
             // Function to make habit names editable
@@ -988,50 +1674,209 @@
             }
             
             function handleHabitNameClick(e) {
-                e.stopPropagation(); // Prevent triggering drag events
+                e.stopPropagation();
                 
                 const habitName = e.target;
                 const currentText = habitName.textContent;
+                const habitRow = habitName.closest('.habit-row');
+                const habitType = habitRow.getAttribute('data-habit-type');
                 
-                // Create input element
-                habitName.classList.add('edit-mode');
+                // Create overlay and modal
+                const overlay = document.createElement('div');
+                overlay.className = 'note-overlay';
+                
+                const modal = document.createElement('div');
+                modal.className = 'habit-note';
+                modal.style.width = '400px';
+                modal.style.top = '50%';
+                modal.style.left = '50%';
+                modal.style.transform = 'translate(-50%, -50%)';
+                
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.className = 'habit-name-input';
                 input.value = currentText;
+                input.maxLength = 50;
                 
-                // Replace text with input
-                habitName.textContent = '';
-                habitName.appendChild(input);
-                input.focus();
+                // Add target input
+                const targetContainer = document.createElement('div');
+                targetContainer.style.marginTop = '1rem';
                 
-                // Handle input blur (finish editing)
-                input.addEventListener('blur', function() {
-                    const newHabitName = this.value || currentText;
-                    habitName.textContent = newHabitName;
-                    habitName.classList.remove('edit-mode');
+                const targetLabel = document.createElement('label');
+                targetLabel.textContent = 'Monthly Target (days):';
+                targetLabel.style.display = 'block';
+                targetLabel.style.marginBottom = '0.5rem';
+                targetLabel.style.fontWeight = '500';
+                
+                const targetInput = document.createElement('input');
+                targetInput.type = 'number';
+                targetInput.min = '1';
+                targetInput.max = '31';
+                targetInput.className = 'habit-name-input';
+                targetInput.placeholder = 'e.g., 20 days per month';
+                
+                // Track initial state for comparison
+                const initialHasTarget = habitTargets[habitType] ? true : false;
+                const initialTargetValue = habitTargets[habitType] ? habitTargets[habitType].target : '';
+                
+                // Set current target if exists
+                if (habitTargets[habitType]) {
+                    targetInput.value = habitTargets[habitType].target;
+                }
+                
+                // Add target toggle
+                const targetToggleContainer = document.createElement('div');
+                targetToggleContainer.style.marginTop = '1rem';
+                targetToggleContainer.style.display = 'flex';
+                targetToggleContainer.style.alignItems = 'center';
+                
+                const targetToggleLabel = document.createElement('label');
+                targetToggleLabel.textContent = 'Enable monthly target:';
+                targetToggleLabel.style.marginRight = '1rem';
+                targetToggleLabel.style.fontWeight = '500';
+                
+                const targetToggle = document.createElement('input');
+                targetToggle.type = 'checkbox';
+                targetToggle.checked = habitTargets[habitType] ? true : false;
+                targetToggle.style.width = '18px';
+                targetToggle.style.height = '18px';
+                
+                // Toggle target input visibility based on checkbox
+                targetToggle.addEventListener('change', function() {
+                    targetInput.disabled = !this.checked;
+                    targetInput.style.opacity = this.checked ? '1' : '0.5';
+                    if (!this.checked) {
+                        targetInput.value = '';
+                    }
                     
-                    // Update habit name in the habits array
-                    const habitRow = habitName.closest('.habit-row');
-                    const habitType = habitRow.getAttribute('data-habit-type');
-                    const habitIndex = habits.findIndex(h => h.type === habitType);
-                    if (habitIndex !== -1) {
-                        habits[habitIndex].name = newHabitName;
-                        saveToLocalStorage(); // Save after changing habit name
-                        updateHabitGraph(); // Update graph after renaming habit
+                    // Update save button state - always enable if toggle state changed
+                    const nameChanged = input.value.trim() !== currentText;
+                    const targetToggleChanged = this.checked !== initialHasTarget;
+                    const targetValueChanged = this.checked && targetInput.value !== initialTargetValue;
+                    
+                    saveButton.disabled = !(nameChanged || targetToggleChanged || targetValueChanged);
+                });
+                
+                // Initialize target input state
+                targetInput.disabled = !targetToggle.checked;
+                targetInput.style.opacity = targetToggle.checked ? '1' : '0.5';
+                
+                targetToggleContainer.appendChild(targetToggleLabel);
+                targetToggleContainer.appendChild(targetToggle);
+                
+                targetContainer.appendChild(targetToggleContainer);
+                targetContainer.appendChild(document.createElement('br'));
+                targetContainer.appendChild(targetLabel);
+                targetContainer.appendChild(targetInput);
+                
+                const actions = document.createElement('div');
+                actions.className = 'note-actions';
+                
+                const saveButton = document.createElement('button');
+                saveButton.className = 'note-btn note-save';
+                saveButton.textContent = 'Save';
+                saveButton.disabled = true;
+                
+                const cancelButton = document.createElement('button');
+                cancelButton.className = 'note-btn note-cancel';
+                cancelButton.textContent = 'Cancel';
+                
+                actions.appendChild(cancelButton);
+                actions.appendChild(saveButton);
+                
+                modal.appendChild(input);
+                modal.appendChild(targetContainer);
+                modal.appendChild(actions);
+                
+                // Add to document
+                document.body.appendChild(overlay);
+                document.body.appendChild(modal);
+                
+                // Focus and select input
+                input.focus();
+                input.select();
+                
+                // Enable/disable save button based on input
+                input.addEventListener('input', function() {
+                    const nameChanged = this.value.trim() !== currentText;
+                    const targetToggleChanged = targetToggle.checked !== initialHasTarget;
+                    const targetValueChanged = targetToggle.checked && targetInput.value !== initialTargetValue;
+                    
+                    saveButton.disabled = !(nameChanged || targetToggleChanged || targetValueChanged);
+                });
+                
+                targetInput.addEventListener('input', function() {
+                    const nameChanged = input.value.trim() !== currentText;
+                    const targetToggleChanged = targetToggle.checked !== initialHasTarget;
+                    const targetValueChanged = targetToggle.checked && this.value !== initialTargetValue;
+                    
+                    saveButton.disabled = !(nameChanged || targetToggleChanged || targetValueChanged);
+                });
+                
+                function closeModal() {
+                    modal.remove();
+                    overlay.remove();
+                }
+                
+                function saveHabitName() {
+                    const newHabitName = input.value.trim();
+                    const targetValue = parseInt(targetInput.value);
+                    const targetEnabled = targetToggle.checked;
+                    
+                    let updated = false;
+                    
+                    if (newHabitName && newHabitName !== currentText) {
+                        habitName.textContent = newHabitName;
+                        
+                        // Update habit name in the habits array
+                        const habitIndex = habits.findIndex(h => h.type === habitType);
+                        if (habitIndex !== -1) {
+                            habits[habitIndex].name = newHabitName;
+                            updated = true;
+                        }
+                    }
+                    
+                    // Update target if enabled and provided
+                    if (targetEnabled && !isNaN(targetValue) && targetValue > 0) {
+                        habitTargets[habitType] = {
+                            target: targetValue
+                        };
+                        updated = true;
+                    } else if (!targetEnabled && habitTargets[habitType]) {
+                        // Remove target if disabled
+                        delete habitTargets[habitType];
+                        updated = true;
+                    }
+                    
+                    if (updated) {
+                        saveToLocalStorage();
+                        updateCalendar();
+                        updateHabitGraph();
+                    }
+                    
+                    closeModal();
+                }
+                
+                // Add event listeners
+                saveButton.addEventListener('click', saveHabitName);
+                cancelButton.addEventListener('click', closeModal);
+                overlay.addEventListener('click', closeModal);
+                
+                // Handle Enter and Escape keys
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !saveButton.disabled) {
+                        saveHabitName();
+                    } else if (e.key === 'Escape') {
+                        closeModal();
                     }
                 });
                 
-                // Handle Enter key
-                input.addEventListener('keydown', function(event) {
-                    if (event.key === 'Enter') {
-                        this.blur(); // Trigger blur event
+                targetInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !saveButton.disabled) {
+                        saveHabitName();
+                    } else if (e.key === 'Escape') {
+                        closeModal();
                     }
-                });
-                
-                // Prevent drag during editing
-                input.addEventListener('mousedown', function(e) {
-                    e.stopPropagation();
                 });
             }
             
@@ -1201,8 +2046,8 @@
                     datasets.push({
                         label: 'Completed Habits',
                         data: data,
-                        borderColor: isDarkMode ? '#818cf8' : '#4f46e5',
-                        backgroundColor: isDarkMode ? 'rgba(129, 140, 248, 0.2)' : 'rgba(79, 70, 229, 0.2)',
+                        borderColor: isDarkMode ? '#818cf8' : '#4338ca',
+                        backgroundColor: isDarkMode ? 'rgba(129, 140, 248, 0.2)' : 'rgba(67, 56, 202, 0.2)',
                         fill: true,
                         tension: 0.3
                     });
@@ -1222,14 +2067,14 @@
                             borderColor = isDarkMode ? '#fbbf24' : '#f59e0b';
                             backgroundColor = isDarkMode ? 'rgba(251, 191, 36, 0.2)' : 'rgba(245, 158, 11, 0.2)';
                         } else if (habit.type === 'meditation') {
-                            borderColor = isDarkMode ? '#34d399' : '#10b981';
-                            backgroundColor = isDarkMode ? 'rgba(52, 211, 153, 0.2)' : 'rgba(16, 185, 129, 0.2)';
+                            borderColor = isDarkMode ? '#34d399' : '#059669';
+                            backgroundColor = isDarkMode ? 'rgba(52, 211, 153, 0.2)' : 'rgba(5, 150, 105, 0.2)';
                         } else if (habit.type === 'gaming') {
                             borderColor = isDarkMode ? '#3b82f6' : '#2563eb';
                             backgroundColor = isDarkMode ? 'rgba(59, 130, 246, 0.2)' : 'rgba(37, 99, 235, 0.2)';
                         } else {
-                            borderColor = isDarkMode ? '#818cf8' : '#4f46e5';
-                            backgroundColor = isDarkMode ? 'rgba(129, 140, 248, 0.2)' : 'rgba(79, 70, 229, 0.2)';
+                            borderColor = isDarkMode ? '#818cf8' : '#4338ca';
+                            backgroundColor = isDarkMode ? 'rgba(129, 140, 248, 0.2)' : 'rgba(67, 56, 202, 0.2)';
                         }
                         
                         datasets.push({
@@ -1270,7 +2115,7 @@
                                         callback: function(value) {
                                             return value;
                                         },
-                                        color: isDarkMode ? '#f9fafb' : '#333'
+                                        color: isDarkMode ? '#f8fafc' : '#1e293b'
                                     },
                                     grid: {
                                         color: isDarkMode ? 'rgba(75, 85, 99, 0.3)' : 'rgba(229, 231, 235, 0.8)'
@@ -1278,7 +2123,7 @@
                                 },
                                 x: {
                                     ticks: {
-                                        color: isDarkMode ? '#f9fafb' : '#333'
+                                        color: isDarkMode ? '#f8fafc' : '#1e293b'
                                     },
                                     grid: {
                                         color: isDarkMode ? 'rgba(75, 85, 99, 0.3)' : 'rgba(229, 231, 235, 0.8)'
@@ -1288,14 +2133,14 @@
                             plugins: {
                                 legend: {
                                     labels: {
-                                        color: isDarkMode ? '#f9fafb' : '#333'
+                                        color: isDarkMode ? '#f8fafc' : '#1e293b'
                                     }
                                 },
                                 tooltip: {
                                     backgroundColor: isDarkMode ? '#374151' : 'rgba(255, 255, 255, 0.9)',
-                                    titleColor: isDarkMode ? '#f9fafb' : '#333',
-                                    bodyColor: isDarkMode ? '#f9fafb' : '#333',
-                                    borderColor: isDarkMode ? '#4b5563' : '#e5e7eb',
+                                    titleColor: isDarkMode ? '#f8fafc' : '#1e293b',
+                                    bodyColor: isDarkMode ? '#f8fafc' : '#1e293b',
+                                    borderColor: isDarkMode ? '#4b5563' : '#e2e8f0',
                                     borderWidth: 1
                                 }
                             }
@@ -1308,44 +2153,468 @@
             graphHabitSelect.addEventListener('change', updateHabitGraph);
             graphPeriodSelect.addEventListener('change', updateHabitGraph);
             
-            // Month navigation
+            // Month navigation with enhanced transitions
             prevMonthBtn.addEventListener('click', function() {
+                // Add button press animation
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+                
+                // Slide out current month
+                calendarTable.style.opacity = '0';
+                calendarTable.style.transform = 'translateX(20px)';
+                
+                setTimeout(() => {
                 currentDate.setMonth(currentDate.getMonth() - 1);
                 updateCalendar();
+                    
+                    // Slide in new month
+                    calendarTable.style.transform = 'translateX(-20px)';
+                    setTimeout(() => {
+                        calendarTable.style.opacity = '1';
+                        calendarTable.style.transform = 'translateX(0)';
+                    }, 50);
+                }, 200);
             });
             
             nextMonthBtn.addEventListener('click', function() {
+                // Add button press animation
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+                
+                // Slide out current month
+                calendarTable.style.opacity = '0';
+                calendarTable.style.transform = 'translateX(-20px)';
+                
+                setTimeout(() => {
                 currentDate.setMonth(currentDate.getMonth() + 1);
                 updateCalendar();
+                    
+                    // Slide in new month
+                    calendarTable.style.transform = 'translateX(20px)';
+                    setTimeout(() => {
+                        calendarTable.style.opacity = '1';
+                        calendarTable.style.transform = 'translateX(0)';
+                    }, 50);
+                }, 200);
             });
             
             // Add new habit functionality
             const addHabitBtn = document.getElementById('add-habit-btn');
             addHabitBtn.addEventListener('click', function() {
-                const habitName = prompt('Enter habit name:');
-                if (habitName) {
-                    // Create unique ID for the new habit
-                    const habitType = 'custom-' + Date.now();
+                // Create modal for new habit
+                const overlay = document.createElement('div');
+                overlay.className = 'note-overlay';
+                
+                const modal = document.createElement('div');
+                modal.className = 'habit-note';
+                modal.style.width = '400px';
+                modal.style.top = '50%';
+                modal.style.left = '50%';
+                modal.style.transform = 'translate(-50%, -50%)';
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'habit-name-input';
+                input.placeholder = 'Enter habit name';
+                input.maxLength = 50; // Prevent extremely long habit names
+                
+                // Add target toggle
+                const targetToggleContainer = document.createElement('div');
+                targetToggleContainer.style.marginTop = '1rem';
+                targetToggleContainer.style.display = 'flex';
+                targetToggleContainer.style.alignItems = 'center';
+                
+                const targetToggleLabel = document.createElement('label');
+                targetToggleLabel.textContent = 'Enable monthly target:';
+                targetToggleLabel.style.marginRight = '1rem';
+                targetToggleLabel.style.fontWeight = '500';
+                
+                const targetToggle = document.createElement('input');
+                targetToggle.type = 'checkbox';
+                targetToggle.checked = false; // Default to unchecked for new habits
+                targetToggle.style.width = '18px';
+                targetToggle.style.height = '18px';
+                
+                targetToggleContainer.appendChild(targetToggleLabel);
+                targetToggleContainer.appendChild(targetToggle);
+                
+                // Add target input
+                const targetContainer = document.createElement('div');
+                targetContainer.style.marginTop = '1rem';
+                
+                const targetLabel = document.createElement('label');
+                targetLabel.textContent = 'Monthly Target (days):';
+                targetLabel.style.display = 'block';
+                targetLabel.style.marginBottom = '0.5rem';
+                targetLabel.style.fontWeight = '500';
+                
+                const targetInput = document.createElement('input');
+                targetInput.type = 'number';
+                targetInput.min = '1';
+                targetInput.max = '31';
+                targetInput.className = 'habit-name-input';
+                targetInput.placeholder = 'e.g., 20 days per month';
+                targetInput.disabled = !targetToggle.checked; // Initially disabled if toggle is unchecked
+                targetInput.style.opacity = targetToggle.checked ? '1' : '0.5';
+                
+                // Toggle target input visibility based on checkbox
+                targetToggle.addEventListener('change', function() {
+                    targetInput.disabled = !this.checked;
+                    targetInput.style.opacity = this.checked ? '1' : '0.5';
+                    if (!this.checked) {
+                        targetInput.value = '';
+                    }
+                    // Update add button state
+                    addButton.disabled = !input.value.trim() || (this.checked && !targetInput.value.trim());
+                });
+                
+                targetContainer.appendChild(targetLabel);
+                targetContainer.appendChild(targetInput);
+                
+                const actions = document.createElement('div');
+                actions.className = 'note-actions';
+                
+                const addButton = document.createElement('button');
+                addButton.className = 'note-btn note-save';
+                addButton.textContent = 'Add Habit';
+                addButton.disabled = true; // Initially disabled
+                
+                const cancelButton = document.createElement('button');
+                cancelButton.className = 'note-btn note-cancel';
+                cancelButton.textContent = 'Cancel';
+                
+                actions.appendChild(cancelButton);
+                actions.appendChild(addButton);
+                
+                modal.appendChild(input);
+                modal.appendChild(targetToggleContainer);
+                modal.appendChild(targetContainer);
+                modal.appendChild(actions);
+                
+                // Add to document
+                document.body.appendChild(overlay);
+                document.body.appendChild(modal);
+                
+                // Focus input
+                input.focus();
+                
+                // Enable/disable add button based on input
+                input.addEventListener('input', function() {
+                    const nameValue = this.value.trim();
+                    const targetEnabled = targetToggle.checked;
+                    const targetValue = targetInput.value.trim();
                     
-                    // Add to habits array
-                    habits.push({
-                        name: habitName,
-                        type: habitType
-                    });
+                    addButton.disabled = !nameValue || (targetEnabled && !targetValue);
+                });
+                
+                targetInput.addEventListener('input', function() {
+                    const nameValue = input.value.trim();
+                    const targetEnabled = targetToggle.checked;
+                    const targetValue = this.value.trim();
                     
-                    // Save to localStorage after adding new habit
-                    saveToLocalStorage();
-                    
-                    // Refresh the calendar to show the new habit
-                    updateCalendar();
-                    updateHabitGraph(); // Update graph after adding new habit
+                    addButton.disabled = !nameValue || (targetEnabled && !targetValue);
+                });
+                
+                function closeModal() {
+                    modal.remove();
+                    overlay.remove();
                 }
+                
+                function addHabit() {
+                    const habitName = input.value.trim();
+                    const targetEnabled = targetToggle.checked;
+                    const targetValue = parseInt(targetInput.value);
+                    
+                    if (habitName) {
+                        // Check for duplicate habit names
+                        const isDuplicate = habits.some(h => h.name.toLowerCase() === habitName.toLowerCase());
+                        
+                        if (isDuplicate) {
+                            alert('A habit with this name already exists. Please use a different name.');
+                            return;
+                        }
+                        
+                        // Create unique ID for the new habit
+                        const habitType = 'custom-' + Date.now();
+                        
+                        // Add to habits array
+                        habits.push({
+                            name: habitName,
+                            type: habitType
+                        });
+                        
+                        // Add target if enabled and provided
+                        if (targetEnabled && !isNaN(targetValue) && targetValue > 0) {
+                            habitTargets[habitType] = {
+                                target: targetValue
+                            };
+                        }
+                        
+                        // Save to localStorage after adding new habit
+                        saveToLocalStorage();
+                        
+                        // Refresh the calendar to show the new habit
+                        updateCalendar();
+                        updateHabitGraph();
+                        closeModal();
+                    }
+                }
+                
+                // Add event listeners
+                addButton.addEventListener('click', addHabit);
+                cancelButton.addEventListener('click', closeModal);
+                overlay.addEventListener('click', closeModal);
+                
+                // Handle Enter and Escape keys
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !addButton.disabled) {
+                        addHabit();
+                    } else if (e.key === 'Escape') {
+                        closeModal();
+                    }
+                });
+                
+                targetInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !addButton.disabled) {
+                        addHabit();
+                    } else if (e.key === 'Escape') {
+                        closeModal();
+                    }
+                });
             });
+            
+            // Function to update heat map for a specific day with smoother transitions
+            function updateHeatMapForDay(year, month, dayNumber) {
+                // Find the header cell for this day - using attribute selector instead of index
+                const dayHeaderCell = document.querySelector(`.header-cell.day-cell:nth-child(${dayNumber + 1})`);
+                
+                if (!dayHeaderCell) return; // Safety check
+                
+                // Count completed habits for this day
+                let completedCount = 0;
+                let totalHabits = habits.length;
+                
+                if (totalHabits === 0) {
+                    // No habits case - set transparent background
+                    dayHeaderCell.style.backgroundColor = 'transparent';
+                    return;
+                }
+                
+                habits.forEach(habit => {
+                    const dateKey = `${year}-${month}-${dayNumber}-${habit.type}`;
+                    if (completedDays[dateKey] === true) {
+                        completedCount++;
+                    }
+                });
+                
+                // Calculate heat level
+                let backgroundColor = 'transparent';
+                const completionRate = completedCount / totalHabits;
+                
+                if (completionRate > 0) {
+                    // Use HSL for smooth color transition with different values for dark mode
+                    let hue, saturation, lightness, opacity;
+                    
+                    if (isDarkMode) {
+                        // Dark mode heat map colors - original
+                        if (completionRate <= 0.5) {
+                            // Red (0) to Yellow (60)
+                            hue = completionRate * 2 * 60;
+                            lightness = 45 + (completionRate * 10); // 45-55% lightness for dark mode
+                            saturation = 85 - (completionRate * 10); // Slightly desaturate towards yellow
+                        } else {
+                            // Yellow (60) to Green (120)
+                            hue = 60 + (completionRate - 0.5) * 2 * 60;
+                            lightness = 55 - ((completionRate - 0.5) * 15); // Slightly darker for green
+                            saturation = 75 + ((completionRate - 0.5) * 20); // More saturated for green
+                        }
+                        // Opacity increases with completion but stays subtle
+                        opacity = 0.4 + (completionRate * 0.4);
+                    } else {
+                        // Light mode heat map colors - original
+                        if (completionRate <= 0.5) {
+                            // Red (0) to Yellow (60)
+                            hue = completionRate * 2 * 60;
+                            // Start with lighter red and transition to yellow
+                            lightness = 55 + (completionRate * 10); // 55-65% lightness
+                            saturation = 85 - (completionRate * 10); // Slightly desaturate towards yellow
+                        } else {
+                            // Yellow (60) to Green (120)
+                            hue = 60 + (completionRate - 0.5) * 2 * 60;
+                            lightness = 65 - ((completionRate - 0.5) * 15); // Slightly darker for green
+                            saturation = 75 + ((completionRate - 0.5) * 20); // More saturated for green
+                        }
+                        // Opacity increases with completion but stays subtle
+                        opacity = 0.35 + (completionRate * 0.45);
+                    }
+                    
+                    backgroundColor = `hsla(${hue}, ${saturation}%, ${lightness}%, ${opacity})`;
+                } else {
+                    // No completion color
+                    if (isDarkMode) {
+                        backgroundColor = 'hsla(0, 70%, 45%, 0.35)'; // Darker, more subdued red for dark mode
+                    } else {
+                        backgroundColor = 'hsla(0, 85%, 65%, 0.35)'; // Original light mode red
+                    }
+                }
+                
+                // Update the background color with transition
+                dayHeaderCell.style.transition = 'background-color 0.3s ease';
+                dayHeaderCell.style.backgroundColor = backgroundColor;
+            }
             
             // Load data from localStorage first, then initialize calendar
             loadFromLocalStorage();
             updateCalendar();
         });
+        
+        // Add haptic feedback function (for supported devices)
+        function triggerHapticFeedback(intensity) {
+            if (navigator.vibrate) {
+                switch(intensity) {
+                    case 'light':
+                        navigator.vibrate(10);
+                        break;
+                    case 'medium':
+                        navigator.vibrate(15);
+                        break;
+                    case 'heavy':
+                        navigator.vibrate([10, 30, 10]);
+                        break;
+                    case 'success':
+                        navigator.vibrate([10, 50, 20]);
+                        break;
+                    default:
+                        navigator.vibrate(10);
+                }
+            }
+        }
+        
+        // Add confetti animation for achievements
+        function showConfetti(x, y) {
+            const colors = ['#0071e3', '#42a5f5', '#34c759', '#ffcc00', '#ff9500'];
+            const confettiCount = 50;
+            
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = `${x}px`;
+                confetti.style.top = `${y}px`;
+                confetti.style.width = `${Math.random() * 8 + 4}px`;
+                confetti.style.height = `${Math.random() * 8 + 4}px`;
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                
+                document.body.appendChild(confetti);
+                
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = 5 + Math.random() * 10;
+                const tx = x + Math.cos(angle) * 100 * Math.random();
+                const ty = y + Math.sin(angle) * 100 * Math.random();
+                
+                confetti.animate([
+                    { transform: `translate(0, 0) rotate(0deg)`, opacity: 1 },
+                    { transform: `translate(${tx - x}px, ${ty - y}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+                ], {
+                    duration: 1000 + Math.random() * 1000,
+                    easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)'
+                }).onfinish = () => confetti.remove();
+            }
+        }
+        
+        // Add tooltip functionality
+        const tooltip = document.getElementById('tooltip');
+        
+        function showTooltip(text, x, y) {
+            tooltip.textContent = text;
+            tooltip.style.left = `${x}px`;
+            tooltip.style.top = `${y}px`;
+            tooltip.classList.add('visible');
+        }
+        
+        function hideTooltip() {
+            tooltip.classList.remove('visible');
+        }
+        
+        // Add streak tracking functionality
+        function calculateStreak(habitType) {
+            const today = new Date();
+            let currentStreak = 0;
+            let date = new Date(today);
+            
+            while (true) {
+                const year = date.getFullYear();
+                const month = date.getMonth();
+                const day = date.getDate();
+                const dateKey = `${year}-${month}-${day}-${habitType}`;
+                
+                if (completedDays[dateKey] === true) {
+                    currentStreak++;
+                    date.setDate(date.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+            
+            return currentStreak;
+        }
+        
+        // Enhanced habit cell click with haptic feedback and animations
+        function enhancedHabitCellClick(cell, dateKey) {
+            // Add ripple effect
+            const rect = cell.getBoundingClientRect();
+            const x = rect.width / 2;
+            const y = rect.height / 2;
+            
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple-effect';
+            cell.appendChild(ripple);
+            
+            ripple.animate([
+                { top: y + 'px', left: x + 'px', width: '0', height: '0', opacity: 0.5 },
+                { top: y + 'px', left: x + 'px', width: '150%', height: '150%', opacity: 0 }
+            ], {
+                duration: 400,
+                easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)'
+            }).onfinish = () => ripple.remove();
+            
+            // Toggle completion state with enhanced animation
+            if (cell.classList.contains('completed')) {
+                cell.classList.remove('completed');
+                completedDays[dateKey] = false;
+                triggerHapticFeedback('light');
+            } else {
+                cell.classList.remove('crossed');
+                cell.classList.add('completed');
+                completedDays[dateKey] = true;
+                triggerHapticFeedback('success');
+                
+                // Check if this completes a streak milestone (5, 10, 25, etc.)
+                const habitType = dateKey.split('-')[3];
+                const streak = calculateStreak(habitType);
+                
+                if (streak === 5 || streak === 10 || streak === 25 || streak === 50 || streak === 100) {
+                    // Show confetti for streak milestone
+                    const cellRect = cell.getBoundingClientRect();
+                    showConfetti(cellRect.left + cellRect.width / 2, cellRect.top + cellRect.height / 2);
+                    
+                    // Show achievement tooltip
+                    showTooltip(`🔥 ${streak} day streak!`, cellRect.left, cellRect.top - 40);
+                    setTimeout(hideTooltip, 2000);
+                }
+            }
+            
+            // Update heat map and save
+            const [year, month, day] = dateKey.split('-');
+            updateHeatMapForDay(parseInt(year), parseInt(month), parseInt(day));
+            saveToLocalStorage();
+            updateHabitGraph();
+        }
     </script>
 </body>
 </html>
