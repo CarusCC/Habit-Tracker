@@ -96,6 +96,31 @@
             box-shadow: var(--shadow-sm);
         }
         
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .header-button {
+            background: transparent;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            padding: 0;
+            transition: all 0.2s ease;
+        }
+        
+        .header-button:hover {
+            background-color: var(--light-gray);
+        }
+        
         .logo {
             font-size: 1.75rem;
             font-weight: 600;
@@ -134,6 +159,31 @@
             gap: 2rem;
             padding: 3rem 0 2rem;
             background-color: transparent;
+            position: relative;
+        }
+        
+        .add-goal-nav-btn {
+            position: absolute;
+            right: 2.5rem;
+            background: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            border-radius: var(--radius-sm);
+            padding: 0.4rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .add-goal-nav-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        .add-goal-nav-btn:active {
+            transform: translateY(0);
         }
         
         .month-display {
@@ -189,9 +239,9 @@
             table-layout: fixed;
             border-collapse: separate;
             border-spacing: 0;
-            background-color: var(--bg-color);
             overflow-x: auto;
             max-height: 70vh;
+            scrollbar-width: thin;
             overflow-y: auto;
             outline: none;
             border: none;
@@ -591,7 +641,7 @@
             filter: brightness(0.95);
             box-shadow: var(--shadow-sm);
         }
-
+        
         .graph-container {
             margin: 3rem 2.5rem;
             padding: 2.5rem;
@@ -794,7 +844,17 @@
             overflow: hidden;
             min-width: 50px; /* Ensure minimum width */
         }
-
+        
+        .habit-target-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+        
         .habit-target-label {
             white-space: nowrap;
             overflow: hidden; /* Prevent overflow */
@@ -853,15 +913,113 @@
         }
         
         /* Remove all tooltip, ripple effects and other potentially problematic styling */
+        
+        /* Goal section styling */
+        .goal-container {
+            background-color: var(--bg-color);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow);
+            margin: 1.5rem 2.5rem 1rem;
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+        
+        .goal-text {
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: var(--text-color);
+            flex-grow: 1;
+            line-height: 1.4;
+        }
+        
+        .goal-emoji {
+            font-size: 2rem;
+            margin-right: 1rem;
+        }
+        
+        .goal-content {
+            display: flex;
+            align-items: center;
+        }
+        
+        .add-goal-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            border-radius: var(--radius-sm);
+            padding: 0.4rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-left: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .add-goal-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        .add-goal-btn:active {
+            transform: translateY(0);
+        }
+        
+        .edit-goal-btn, .delete-goal-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 0.25rem;
+            margin-left: 0.5rem;
+            border-radius: 50%;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+        }
+        
+        .edit-goal-btn:hover, .delete-goal-btn:hover {
+            background-color: var(--light-gray);
+            color: var(--text-color);
+        }
+        
+        .goal-placeholder {
+            color: var(--text-light);
+            font-style: italic;
+        }
+        
+        .goal-actions {
+            display: flex;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
     <header class="header">
         <div class="logo">HabitTracker</div>
-        <div class="theme-toggle" id="theme-toggle">
-            <span id="theme-icon">🌙</span>
+        <div class="header-actions">
+            <button id="goal-button" class="header-button" title="Set Monthly Goal">🎯</button>
+            <div class="theme-toggle" id="theme-toggle">
+                <span id="theme-icon">🌙</span>
+            </div>
         </div>
     </header>
+    
+    <!-- Goal section -->
+    <div id="goal-section">
+        <!-- Goal will be dynamically generated here -->
+    </div>
     
     <div class="month-nav">
         <button class="nav-btn" id="prev-month">❮</button>
@@ -898,6 +1056,17 @@
     <div id="tooltip" class="tooltip"></div>
 
     <script>
+        // Initialize all variables at the global scope BEFORE any other code
+        let habits = [];
+        let completedDays = {};
+        let habitNotes = {};
+        let habitTargets = {};
+        let goalData = null;
+        let isDarkMode = false;
+        let currentDate = new Date(2025, 1, 1); // February 2025
+        let habitChart = null;
+        let draggedElement = null;
+        
         document.addEventListener('DOMContentLoaded', function() {
             // Date management
             const prevMonthBtn = document.getElementById('prev-month');
@@ -909,12 +1078,14 @@
             const graphHabitSelect = document.getElementById('graph-habit-select');
             const graphPeriodSelect = document.getElementById('graph-period-select');
             const habitGraphCanvas = document.getElementById('habit-graph');
+            const goalSection = document.getElementById('goal-section');
+            const goalButton = document.getElementById('goal-button');
             
             // Chart instance
-            let habitChart = null;
+            habitChart = null;
             
-            // Theme management
-            let isDarkMode = localStorage.getItem('dailyHabits_darkMode') === 'true';
+            // Theme management - get from localStorage
+            isDarkMode = localStorage.getItem('dailyHabits_darkMode') === 'true';
             
             // Apply theme based on saved preference
             if (isDarkMode) {
@@ -938,6 +1109,7 @@
                 localStorage.setItem('dailyHabits_darkMode', isDarkMode);
                 updateCalendar();
                 updateHabitGraph();
+                updateGoalSection();
             });
             
             const months = [
@@ -947,74 +1119,175 @@
             
             const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
             
-            // Initialize with February 2025
-            let currentDate = new Date(2025, 1, 1); // Month is 0-indexed in JS Date
-            
-            // Initial habit data (will be overridden by localStorage if available)
-            let habits = [];
-            
-            // Initialize completed days (empty for now, will be loaded from localStorage)
-            let completedDays = {};
-            
-            // Initialize notes
-            let habitNotes = {};
-            
-            // Initialize habit targets
-            let habitTargets = {};
-            
-            // Drag and drop variables
-            let draggedElement = null;
+            // Use the existing global variables, don't redeclare them
+            currentDate = new Date(2025, 1, 1); // Month is 0-indexed in JS Date
             
             // Load data from localStorage if available
             function loadFromLocalStorage() {
-                const savedHabits = localStorage.getItem('dailyHabits_habits');
-                const savedCompletedDays = localStorage.getItem('dailyHabits_completedDays');
-                const savedCurrentDate = localStorage.getItem('dailyHabits_currentDate');
-                const savedHabitNotes = localStorage.getItem('dailyHabits_habitNotes');
-                const savedDarkMode = localStorage.getItem('dailyHabits_darkMode');
-                const savedHabitTargets = localStorage.getItem('dailyHabits_habitTargets');
-                
-                if (savedHabits) {
-                    habits = JSON.parse(savedHabits);
-                }
-                
-                if (savedCompletedDays) {
-                    completedDays = JSON.parse(savedCompletedDays);
-                }
-                
-                if (savedCurrentDate) {
-                    const dateObj = new Date(savedCurrentDate);
-                    // Only use saved date if it's valid
-                    if (!isNaN(dateObj.getTime())) {
-                        currentDate = dateObj;
+                try {
+                    const savedHabits = localStorage.getItem('dailyHabits_habits');
+                    const savedCompletedDays = localStorage.getItem('dailyHabits_completedDays');
+                    const savedCurrentDate = localStorage.getItem('dailyHabits_currentDate');
+                    const savedHabitNotes = localStorage.getItem('dailyHabits_habitNotes');
+                    const savedDarkMode = localStorage.getItem('dailyHabits_darkMode');
+                    const savedHabitTargets = localStorage.getItem('dailyHabits_habitTargets');
+                    const savedGoal = localStorage.getItem('dailyHabits_goal');
+                    
+                    console.log("Loading from localStorage - Raw data:", {
+                        savedHabits, 
+                        savedCompletedDays,
+                        savedCurrentDate
+                    });
+                    
+                    if (savedHabits) {
+                        habits = JSON.parse(savedHabits);
                     }
-                }
-                
-                if (savedHabitNotes) {
-                    habitNotes = JSON.parse(savedHabitNotes);
-                }
-                
-                if (savedHabitTargets) {
-                    habitTargets = JSON.parse(savedHabitTargets);
-                }
-                
-                if (savedDarkMode) {
-                    isDarkMode = savedDarkMode === 'true';
-                    if (isDarkMode) {
-                        document.documentElement.setAttribute('data-theme', 'dark');
-                        themeIcon.textContent = '☀️';
+                    
+                    if (savedCompletedDays) {
+                        completedDays = JSON.parse(savedCompletedDays);
+                        console.log("Loaded completedDays directly:", completedDays);
                     }
+                    
+                    if (savedCurrentDate) {
+                        const dateObj = new Date(savedCurrentDate);
+                        // Only use saved date if it's valid
+                        if (!isNaN(dateObj.getTime())) {
+                            currentDate = dateObj;
+                        }
+                    }
+                    
+                    if (savedHabitNotes) {
+                        habitNotes = JSON.parse(savedHabitNotes);
+                    }
+                    
+                    if (savedHabitTargets) {
+                        habitTargets = JSON.parse(savedHabitTargets);
+                    }
+                    
+                    if (savedGoal) {
+                        goalData = JSON.parse(savedGoal);
+                    }
+                    
+                    if (savedDarkMode) {
+                        isDarkMode = savedDarkMode === 'true';
+                        if (isDarkMode) {
+                            document.documentElement.setAttribute('data-theme', 'dark');
+                            themeIcon.textContent = '☀️';
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error loading from localStorage:", e);
+                    
+                    // Initialize with empty data structures if there was an error
+                    habits = habits || [];
+                    completedDays = completedDays || {};
+                    habitNotes = habitNotes || {};
+                    habitTargets = habitTargets || {};
                 }
             }
             
-            // Save data to localStorage
+            // Add a debug function to clear storage - this is just for testing
+            function clearAllStorage() {
+                localStorage.removeItem('dailyHabits_habits');
+                localStorage.removeItem('dailyHabits_completedDays');
+                localStorage.removeItem('dailyHabits_currentDate');
+                localStorage.removeItem('dailyHabits_habitNotes');
+                localStorage.removeItem('dailyHabits_habitTargets');
+                localStorage.removeItem('dailyHabits_goal');
+                localStorage.removeItem('dailyHabits_darkMode');
+                console.log("All localStorage items cleared");
+            }
+            
+            // Ensure localStorage is working properly
+            function testLocalStorage() {
+                try {
+                    // Check if we're in private browsing mode
+                    console.log("STORAGE TEST - Starting localStorage test");
+                    
+                    // Test if localStorage is writeable
+                    localStorage.setItem('testKey', 'testValue');
+                    // Test if localStorage is readable
+                    const testValue = localStorage.getItem('testKey');
+                    // Test if localStorage is deletable
+                    localStorage.removeItem('testKey');
+                    
+                    // Test if we can save and reload an object
+                    const testObj = { test: "true" };
+                    localStorage.setItem('testObject', JSON.stringify(testObj));
+                    const testObjValue = JSON.parse(localStorage.getItem('testObject') || "{}");
+                    localStorage.removeItem('testObject');
+                    
+                    const isAvailable = testValue === 'testValue' && testObjValue.test === "true";
+                    console.log(`STORAGE TEST - localStorage availability: ${isAvailable ? "WORKING" : "NOT WORKING"}`);
+                    
+                    if (isAvailable) {
+                        // Display visible notification for user
+                        console.log('STORAGE TEST - localStorage is working properly');
+                        return true;
+                    } else {
+                        // Display visible error for user
+                        alert('localStorage test failed - data will not persist!');
+                        return false;
+                    }
+                } catch (e) {
+                    console.error('STORAGE TEST - localStorage test error:', e);
+                    
+                    // Display visible error for user
+                    alert('localStorage error: ' + e.message + '\nYour changes will not be saved. Please try using a normal browsing session instead of private/incognito mode.');
+                    
+                    return false;
+                }
+            }
+            
+            // Run localStorage test during initialization
+            testLocalStorage();
+            
+            // Load data from localStorage
+            loadFromLocalStorage();
+            
+            // Save data to localStorage with retry mechanism
             function saveToLocalStorage() {
-                localStorage.setItem('dailyHabits_habits', JSON.stringify(habits));
-                localStorage.setItem('dailyHabits_completedDays', JSON.stringify(completedDays));
-                localStorage.setItem('dailyHabits_currentDate', currentDate.toISOString());
-                localStorage.setItem('dailyHabits_habitNotes', JSON.stringify(habitNotes));
-                localStorage.setItem('dailyHabits_habitTargets', JSON.stringify(habitTargets));
-                localStorage.setItem('dailyHabits_darkMode', isDarkMode);
+                try {
+                    // Log the completedDays values to make sure they're as expected
+                    console.log("About to save completedDays (raw object):", completedDays);
+                    
+                    // No conversion needed since we're now storing "true"/"false" strings directly
+                    
+                    // Save all data
+                    localStorage.setItem('dailyHabits_habits', JSON.stringify(habits));
+                    localStorage.setItem('dailyHabits_completedDays', JSON.stringify(completedDays));
+                    localStorage.setItem('dailyHabits_currentDate', currentDate.toISOString());
+                    localStorage.setItem('dailyHabits_habitNotes', JSON.stringify(habitNotes));
+                    localStorage.setItem('dailyHabits_habitTargets', JSON.stringify(habitTargets));
+                    localStorage.setItem('dailyHabits_goal', JSON.stringify(goalData));
+                    localStorage.setItem('dailyHabits_darkMode', isDarkMode);
+                    
+                    // Verify data was saved correctly
+                    const savedCompletedDays = localStorage.getItem('dailyHabits_completedDays');
+                    console.log("Verification - Saved completedDays:", savedCompletedDays);
+                    
+                    return true;
+                } catch (e) {
+                    console.error("Error saving to localStorage:", e);
+                    
+                    // Try one more time after a small delay
+                    setTimeout(() => {
+                        try {
+                            localStorage.setItem('dailyHabits_habits', JSON.stringify(habits));
+                            localStorage.setItem('dailyHabits_completedDays', JSON.stringify(completedDays));
+                            localStorage.setItem('dailyHabits_currentDate', currentDate.toISOString());
+                            localStorage.setItem('dailyHabits_habitNotes', JSON.stringify(habitNotes));
+                            localStorage.setItem('dailyHabits_habitTargets', JSON.stringify(habitTargets));
+                            localStorage.setItem('dailyHabits_goal', JSON.stringify(goalData));
+                            localStorage.setItem('dailyHabits_darkMode', isDarkMode);
+                            console.log("Retry successful");
+                        } catch (retryError) {
+                            console.error("Retry failed:", retryError);
+                        }
+                    }, 500);
+                    
+                    return false;
+                }
             }
             
             // Function to get days in month
@@ -1045,24 +1318,26 @@
                     monthDisplay.textContent = newText;
                 }
                 
-                // Get total days in month
-                const daysInMonth = getDaysInMonth(year, month);
-                
-                // Clear previous calendar content
+                // Clear existing calendar content
                 calendarTable.innerHTML = '';
                 
-                // Create combined header row
+                // Create header row with weekday names and dates
                 const headerRow = document.createElement('div');
                 headerRow.className = 'calendar-header';
+                
+                // Calculate first day of month (0 = Sunday, 1 = Monday, etc.)
+                const firstDayOfMonth = new Date(year, month, 1).getDay();
+                // Calculate days in month
+                const daysInMonth = getDaysInMonth(year, month);
                 
                 // Add empty cell for habit names column
                 const emptyHeaderCell = document.createElement('div');
                 emptyHeaderCell.className = 'header-cell';
                 emptyHeaderCell.textContent = 'Habits';
-                const firstDayOfMonth = new Date(year, month, 1).getDay();
                 if (firstDayOfMonth === 1) { // 1 is Monday
                     emptyHeaderCell.classList.add('week-start');
                 }
+                
                 headerRow.appendChild(emptyHeaderCell);
                 
                 // Add combined day headers with heat map
@@ -1280,10 +1555,16 @@
                         }
                         habitCell.setAttribute('data-date', dateKey);
                         
-                        if (completedDays[dateKey] === true) {
+                        // Explicitly check for the string "true" value
+                        if (completedDays[dateKey] === "true") {
                             habitCell.classList.add('completed');
-                        } else if (completedDays[dateKey] === 'crossed') {
-                            habitCell.classList.add('crossed');
+                            console.log(`Cell ${dateKey} marked as completed from saved data`);
+                        } else if (completedDays[dateKey] === "crossed" || completedDays[dateKey] === "false") {
+                            // For backward compatibility check both crossed and false
+                            if (completedDays[dateKey] === "crossed") {
+                                habitCell.classList.add('crossed');
+                                console.log(`Cell ${dateKey} marked as crossed from saved data`);
+                            }
                         }
                         
                         if (habitNotes[dateKey]) {
@@ -1319,20 +1600,8 @@
                             
                             clearTimeout(clickTimer);
                             clickTimer = setTimeout(() => {
-                                if (this.classList.contains('completed')) {
-                                    this.classList.remove('completed');
-                                    completedDays[dateKey] = false;
-                                } else {
-                                    this.classList.remove('crossed');
-                                    this.classList.add('completed');
-                                    completedDays[dateKey] = true;
-                                }
-                                
-                                // Update heat map for this day
-                                updateHeatMapForDay(parseInt(year), parseInt(month), parseInt(dayNumber));
-                                
-                                saveToLocalStorage();
-                                updateHabitGraph();
+                                const dateKey = this.getAttribute('data-date');
+                                enhancedHabitCellClick(this, dateKey);
                             }, 250);
                         });
                         
@@ -1340,19 +1609,61 @@
                             e.preventDefault();
                             clearTimeout(clickTimer);
                             
+                            console.log("CONTEXT - Starting context menu handler");
+                            
+                            const dateKey = this.getAttribute('data-date');
+                            console.log("CONTEXT - Handling context menu for:", dateKey);
+                            console.log("CONTEXT - Current localStorage state:", localStorage.getItem('dailyHabits_completedDays'));
+                            
                             if (this.classList.contains('crossed')) {
                                 this.classList.remove('crossed');
-                                completedDays[dateKey] = false;
+                                // Store as STRING, not boolean
+                                completedDays[dateKey] = "false";
+                                console.log(`CONTEXT - Removed crossed from ${dateKey}, set to "false"`);
                             } else {
                                 this.classList.remove('completed');
                                 this.classList.add('crossed');
-                                completedDays[dateKey] = 'crossed';
+                                // Store as STRING, not boolean
+                                completedDays[dateKey] = "false";
+                                console.log(`CONTEXT - Added crossed to ${dateKey}, set to "false"`);
                             }
                             
                             // Update heat map for this day
                             updateHeatMapForDay(parseInt(year), parseInt(month), parseInt(dayNumber));
                             
-                            saveToLocalStorage();
+                            // Update target bars in real-time
+                            updateTargetBars();
+                            
+                            // Make sure we're saving immediately
+                            const saveSuccess = saveToLocalStorage();
+                            console.log(`CONTEXT - Saved to localStorage: ${saveSuccess}`);
+                            
+                            // Make multiple verification attempts to ensure data is properly saved
+                            const verifyData = () => {
+                                const savedData = localStorage.getItem('dailyHabits_completedDays');
+                                if (savedData) {
+                                    const parsed = JSON.parse(savedData);
+                                    console.log(`CONTEXT - Verification check - Is ${dateKey} marked correctly:`, parsed[dateKey]);
+                                    console.log(`CONTEXT - Full completedDays object in localStorage:`, savedData);
+                                    
+                                    // If the data doesn't match what we expect, try saving again
+                                    const expectedValue = "false"; // Context menu always sets to "false" string
+                                    if (parsed[dateKey] !== expectedValue) {
+                                        console.log(`CONTEXT - Data mismatch! Expected ${expectedValue} but got ${parsed[dateKey]}. Trying to save again...`);
+                                        saveToLocalStorage();
+                                    }
+                                } else {
+                                    console.error("CONTEXT - No saved data found in verification!");
+                                    // Try to save again
+                                    saveToLocalStorage();
+                                }
+                            };
+                            
+                            // Verify multiple times with increasing delays
+                            setTimeout(verifyData, 100);
+                            setTimeout(verifyData, 500);
+                            setTimeout(verifyData, 1000);
+                            
                             updateHabitGraph();
                         });
                         
@@ -2220,7 +2531,9 @@
                 input.type = 'text';
                 input.className = 'habit-name-input';
                 input.placeholder = 'Enter habit name';
-                input.maxLength = 50; // Prevent extremely long habit names
+                input.maxLength = 100; // Prevent extremely long habit names
+                input.value = habitName || '';
+                input.style.width = '100%';
                 
                 // Add target toggle
                 const targetToggleContainer = document.createElement('div');
@@ -2467,9 +2780,540 @@
                 dayHeaderCell.style.backgroundColor = backgroundColor;
             }
             
-            // Load data from localStorage first, then initialize calendar
-            loadFromLocalStorage();
+            // Load and add sample habits if none exist
+            function addSampleHabits() {
+                habits = [
+                    { name: 'Meditation', type: 'meditation' },
+                    { name: 'Exercise', type: 'exercise' },
+                    { name: 'Reading', type: 'reading' }
+                ];
+                saveToLocalStorage();
+            }
+            
+            // Debug logs to understand what's happening
+            console.log('Habits:', habits);
+            console.log('Goal data:', goalData);
+            
+            // Add sample habits if none exist
+            if (habits.length === 0) {
+                console.log('No habits found, adding sample habits');
+                addSampleHabits();
+            }
+            
+            // Update calendar and UI
             updateCalendar();
+            
+            // Update target bars after calendar is rendered
+            setTimeout(updateTargetBars, 100);
+            
+            // Initialize the goal section
+            updateGoalSection();
+            
+            // Set up the goal button
+            if (goalButton) {
+                goalButton.addEventListener('click', function() {
+                    showGoalModal();
+                });
+                
+                // Update goal button appearance if a goal exists
+                if (goalData) {
+                    goalButton.title = goalData.text;
+                    goalButton.textContent = goalData.emoji || '🎯';
+                    goalButton.style.color = 'var(--primary-color)';
+                } else {
+                    goalButton.title = 'Set Monthly Goal';
+                    goalButton.textContent = '🎯';
+                    goalButton.style.color = '';
+                }
+            }
+            
+            // Function to update the goal section
+            function updateGoalSection() {
+                // Make sure the goal section exists
+                const goalSection = document.getElementById('goal-section');
+                if (!goalSection) return;
+                
+                // Clear previous content
+                goalSection.innerHTML = '';
+                
+                if (goalData) {
+                    // Create goal container
+                    const goalContainer = document.createElement('div');
+                    goalContainer.className = 'goal-container';
+                    
+                    // Create goal content
+                    const goalContent = document.createElement('div');
+                    goalContent.className = 'goal-content';
+                    
+                    // Add emoji and text
+                    const goalEmoji = document.createElement('span');
+                    goalEmoji.className = 'goal-emoji';
+                    goalEmoji.textContent = goalData.emoji || '🎯';
+                    
+                    const goalText = document.createElement('div');
+                    goalText.className = 'goal-text';
+                    goalText.textContent = goalData.text;
+                    
+                    goalContent.appendChild(goalEmoji);
+                    goalContent.appendChild(goalText);
+                    
+                    // Create action buttons
+                    const goalActions = document.createElement('div');
+                    goalActions.className = 'goal-actions';
+                    
+                    const editGoalBtn = document.createElement('button');
+                    editGoalBtn.className = 'edit-goal-btn';
+                    editGoalBtn.innerHTML = '✏️';
+                    editGoalBtn.title = 'Edit Goal';
+                    
+                    const deleteGoalBtn = document.createElement('button');
+                    deleteGoalBtn.className = 'delete-goal-btn';
+                    deleteGoalBtn.innerHTML = '🗑️';
+                    deleteGoalBtn.title = 'Delete Goal';
+                    
+                    goalActions.appendChild(editGoalBtn);
+                    goalActions.appendChild(deleteGoalBtn);
+                    
+                    // Add event listeners for edit and delete buttons
+                    editGoalBtn.addEventListener('click', function() {
+                        showGoalModal(goalData);
+                    });
+                    
+                    deleteGoalBtn.addEventListener('click', function() {
+                        if (confirm('Are you sure you want to delete this goal?')) {
+                            goalData = null;
+                            saveToLocalStorage();
+                            updateGoalSection();
+                        }
+                    });
+                    
+                    // Append content and actions to container
+                    goalContainer.appendChild(goalContent);
+                    goalContainer.appendChild(goalActions);
+                    
+                    goalSection.appendChild(goalContainer);
+                } else {
+                    // Create empty goal container with "Add Goal" button
+                    const emptyGoalContainer = document.createElement('div');
+                    emptyGoalContainer.className = 'goal-container';
+                    
+                    const emptyGoalContent = document.createElement('div');
+                    emptyGoalContent.className = 'goal-content';
+                    
+                    const emptyGoalEmoji = document.createElement('span');
+                    emptyGoalEmoji.className = 'goal-emoji';
+                    emptyGoalEmoji.textContent = '🎯';
+                    
+                    const emptyGoalText = document.createElement('div');
+                    emptyGoalText.className = 'goal-text goal-placeholder';
+                    emptyGoalText.textContent = 'No goal set for this month';
+                    
+                    emptyGoalContent.appendChild(emptyGoalEmoji);
+                    emptyGoalContent.appendChild(emptyGoalText);
+                    
+                    const addGoalBtn = document.createElement('button');
+                    addGoalBtn.className = 'add-goal-btn';
+                    addGoalBtn.textContent = '+ Add Goal';
+                    addGoalBtn.addEventListener('click', function() {
+                        showGoalModal();
+                    });
+                    
+                    emptyGoalContainer.appendChild(emptyGoalContent);
+                    emptyGoalContainer.appendChild(addGoalBtn);
+                    
+                    goalSection.appendChild(emptyGoalContainer);
+                }
+            }
+            
+            // Function to show a temporary notification with the goal
+            function showGoalNotification(goal) {
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.style.position = 'fixed';
+                notification.style.bottom = '20px';
+                notification.style.right = '20px';
+                notification.style.padding = '1rem 1.5rem';
+                notification.style.background = 'var(--bg-color)';
+                notification.style.boxShadow = 'var(--shadow-md)';
+                notification.style.borderRadius = 'var(--radius-md)';
+                notification.style.border = '1px solid var(--border-color)';
+                notification.style.maxWidth = '300px';
+                notification.style.zIndex = '1000';
+                notification.style.display = 'flex';
+                notification.style.alignItems = 'center';
+                notification.style.gap = '0.75rem';
+                notification.style.transform = 'translateY(20px)';
+                notification.style.opacity = '0';
+                notification.style.transition = 'all 0.3s ease';
+                
+                // Add emoji and text
+                const emoji = document.createElement('span');
+                emoji.style.fontSize = '1.5rem';
+                emoji.textContent = goal.emoji || '🎯';
+                
+                const text = document.createElement('div');
+                text.innerHTML = `<strong>Monthly Goal:</strong><br>${goal.text}`;
+                text.style.fontSize = '0.9rem';
+                text.style.color = 'var(--text-color)';
+                
+                notification.appendChild(emoji);
+                notification.appendChild(text);
+                
+                // Add to document
+                document.body.appendChild(notification);
+                
+                // Animate in
+                setTimeout(() => {
+                    notification.style.transform = 'translateY(0)';
+                    notification.style.opacity = '1';
+                }, 10);
+                
+                // Remove after 5 seconds
+                setTimeout(() => {
+                    notification.style.transform = 'translateY(20px)';
+                    notification.style.opacity = '0';
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 300);
+                }, 5000);
+            }
+            
+            // Function to show goal modal
+            function showGoalModal(existingGoal = null) {
+                // Create overlay and modal
+                const overlay = document.createElement('div');
+                overlay.className = 'note-overlay';
+                
+                const modal = document.createElement('div');
+                modal.className = 'habit-note';
+                modal.style.width = '500px';
+                modal.style.top = '50%';
+                modal.style.left = '50%';
+                modal.style.transform = 'translate(-50%, -50%)';
+                
+                const modalTitle = document.createElement('h3');
+                modalTitle.style.marginBottom = '1rem';
+                modalTitle.style.fontSize = '1.2rem';
+                modalTitle.style.fontWeight = '600';
+                modalTitle.textContent = existingGoal ? 'Edit Your Goal' : 'Set Your Goal';
+                
+                // Create emoji selector
+                const emojiRow = document.createElement('div');
+                emojiRow.style.display = 'flex';
+                emojiRow.style.alignItems = 'center';
+                emojiRow.style.marginBottom = '1rem';
+                
+                const emojiLabel = document.createElement('label');
+                emojiLabel.textContent = 'Choose an icon:';
+                emojiLabel.style.marginRight = '1rem';
+                emojiLabel.style.fontWeight = '500';
+                
+                const emojiOptions = ['🎯', '✨', '🚀', '💪', '📈', '🏆', '⭐', '🌟'];
+                const emojiGrid = document.createElement('div');
+                emojiGrid.style.display = 'flex';
+                emojiGrid.style.flexWrap = 'wrap';
+                emojiGrid.style.gap = '0.5rem';
+                
+                let selectedEmoji = existingGoal ? existingGoal.emoji : '🎯';
+                
+                emojiOptions.forEach(emoji => {
+                    const emojiBtn = document.createElement('button');
+                    emojiBtn.type = 'button';
+                    emojiBtn.textContent = emoji;
+                    emojiBtn.style.fontSize = '1.5rem';
+                    emojiBtn.style.width = '40px';
+                    emojiBtn.style.height = '40px';
+                    emojiBtn.style.display = 'flex';
+                    emojiBtn.style.alignItems = 'center';
+                    emojiBtn.style.justifyContent = 'center';
+                    emojiBtn.style.border = emoji === selectedEmoji ? 
+                        `2px solid var(--primary-color)` : 
+                        '1px solid var(--border-color)';
+                    emojiBtn.style.borderRadius = 'var(--radius-sm)';
+                    emojiBtn.style.background = 'transparent';
+                    emojiBtn.style.cursor = 'pointer';
+                    
+                    emojiBtn.addEventListener('click', function() {
+                        // Deselect all emojis
+                        emojiGrid.querySelectorAll('button').forEach(btn => {
+                            btn.style.border = '1px solid var(--border-color)';
+                        });
+                        
+                        // Select this emoji
+                        this.style.border = `2px solid var(--primary-color)`;
+                        selectedEmoji = emoji;
+                    });
+                    
+                    emojiGrid.appendChild(emojiBtn);
+                });
+                
+                emojiRow.appendChild(emojiLabel);
+                emojiRow.appendChild(emojiGrid);
+                
+                // Create goal input
+                const inputLabel = document.createElement('label');
+                inputLabel.textContent = 'Your goal:';
+                inputLabel.style.display = 'block';
+                inputLabel.style.marginBottom = '0.5rem';
+                inputLabel.style.fontWeight = '500';
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'habit-name-input';
+                input.placeholder = 'Enter your goal for this month';
+                input.value = existingGoal ? existingGoal.text : '';
+                input.maxLength = 300;
+                input.style.width = '100%';
+                
+                // Create action buttons
+                const actions = document.createElement('div');
+                actions.className = 'note-actions';
+                actions.style.marginTop = '1.5rem';
+                
+                const saveButton = document.createElement('button');
+                saveButton.className = 'note-btn note-save';
+                saveButton.textContent = existingGoal ? 'Update Goal' : 'Save Goal';
+                saveButton.disabled = !input.value.trim();
+                
+                const cancelButton = document.createElement('button');
+                cancelButton.className = 'note-btn note-cancel';
+                cancelButton.textContent = 'Cancel';
+                
+                actions.appendChild(cancelButton);
+                actions.appendChild(saveButton);
+                
+                // Add all elements to modal
+                modal.appendChild(modalTitle);
+                modal.appendChild(emojiRow);
+                modal.appendChild(inputLabel);
+                modal.appendChild(input);
+                modal.appendChild(actions);
+                
+                // Add to document
+                document.body.appendChild(overlay);
+                document.body.appendChild(modal);
+                
+                // Focus input
+                setTimeout(() => input.focus(), 100);
+                
+                // Enable/disable save button based on input
+                input.addEventListener('input', function() {
+                    saveButton.disabled = !this.value.trim();
+                });
+                
+                function closeModal() {
+                    modal.remove();
+                    overlay.remove();
+                }
+                
+                function saveGoal() {
+                    const goalText = input.value.trim();
+                    
+                    if (goalText) {
+                        goalData = {
+                            text: goalText,
+                            emoji: selectedEmoji,
+                            createdAt: existingGoal ? existingGoal.createdAt : new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        };
+                        
+                        // Update goal button
+                        if (goalButton) {
+                            goalButton.title = goalData.text;
+                            goalButton.textContent = goalData.emoji;
+                            goalButton.style.color = 'var(--primary-color)';
+                        }
+                        
+                        // Update goal section
+                        updateGoalSection();
+                        
+                        saveToLocalStorage();
+                        closeModal();
+                    }
+                }
+                
+                // Add event listeners
+                saveButton.addEventListener('click', saveGoal);
+                cancelButton.addEventListener('click', closeModal);
+                overlay.addEventListener('click', function(e) {
+                    if (e.target === overlay) {
+                        closeModal();
+                    }
+                });
+                
+                // Handle Enter and Escape keys
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !saveButton.disabled) {
+                        saveGoal();
+                    } else if (e.key === 'Escape') {
+                        closeModal();
+                    }
+                });
+            }
+            
+            // Show goal notification on page load if a goal exists
+            if (goalData) {
+                setTimeout(() => {
+                    // Use updateGoalSection instead of notification
+                    updateGoalSection();
+                }, 1000);
+            }
+            
+            // Function to update all target bars for real-time feedback
+            function updateTargetBars() {
+                // For each habit row that has a target
+                habits.forEach(habit => {
+                    const habitType = habit.type;
+                    const targetData = habitTargets[habitType];
+                    
+                    if (targetData && targetData.target > 0) {
+                        // Find the target elements
+                        const habitRow = document.querySelector(`[data-habit-type="${habitType}"]`);
+                        if (!habitRow) return;
+                        
+                        const targetBar = habitRow.querySelector('.habit-target');
+                        if (!targetBar) return;
+                        
+                        const targetProgress = habitRow.querySelector('.habit-target-progress');
+                        const targetLabel = habitRow.querySelector('.habit-target-label');
+                        
+                        if (!targetProgress || !targetLabel) return;
+                        
+                        // Count completed days for this habit in the current month
+                        const year = currentDate.getFullYear();
+                        const month = currentDate.getMonth();
+                        const daysInMonth = getDaysInMonth(year, month);
+                        
+                        let completedCount = 0;
+                        for (let i = 1; i <= daysInMonth; i++) {
+                            const dateKey = `${year}-${month}-${i}-${habitType}`;
+                            if (completedDays[dateKey] === "true") {
+                                completedCount++;
+                            }
+                        }
+                        
+                        // Update progress bar and label
+                        const progressPercent = Math.min(100, (completedCount / targetData.target) * 100);
+                        targetProgress.style.width = `${progressPercent}%`;
+                        targetLabel.textContent = `${completedCount}/${targetData.target}`;
+                    }
+                });
+            }
+            
+            // Enhanced habit cell click with haptic feedback and animations
+            function enhancedHabitCellClick(cell, dateKey) {
+                console.log("CLICK - Starting cell click handler for:", dateKey);
+                console.log("CLICK - Current localStorage state:", localStorage.getItem('dailyHabits_completedDays'));
+                
+                // Add ripple effect
+                const rect = cell.getBoundingClientRect();
+                const x = rect.width / 2;
+                const y = rect.height / 2;
+                
+                const ripple = document.createElement('div');
+                ripple.className = 'ripple-effect';
+                cell.appendChild(ripple);
+                
+                ripple.animate([
+                    { top: y + 'px', left: x + 'px', width: '0', height: '0', opacity: 0.5 },
+                    { top: y + 'px', left: x + 'px', width: '150%', height: '150%', opacity: 0 }
+                ], {
+                    duration: 400,
+                    easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)'
+                }).onfinish = () => ripple.remove();
+                
+                // Toggle completion state with enhanced animation
+                let newState;
+                
+                if (cell.classList.contains('completed')) {
+                    cell.classList.remove('completed');
+                    // Very important: Store as STRING "true"/"false", not boolean
+                    newState = "false";
+                    completedDays[dateKey] = newState;
+                    console.log(`CLICK - Marked ${dateKey} as "false" (incomplete)`);
+                    triggerHapticFeedback('light');
+                } else {
+                    cell.classList.remove('crossed');
+                    cell.classList.add('completed');
+                    // Very important: Store as STRING "true"/"false", not boolean
+                    newState = "true";
+                    completedDays[dateKey] = newState;
+                    console.log(`CLICK - Marked ${dateKey} as "true" (completed)`);
+                    triggerHapticFeedback('success');
+                    
+                    // Check if this completes a streak milestone (5, 10, 25, etc.)
+                    const habitType = dateKey.split('-')[3];
+                    const streak = calculateStreak(habitType);
+                    
+                    if (streak === 5 || streak === 10 || streak === 25 || streak === 50 || streak === 100) {
+                        // Show confetti for streak milestone
+                        const cellRect = cell.getBoundingClientRect();
+                        showConfetti(cellRect.left + cellRect.width / 2, cellRect.top + cellRect.height / 2);
+                        
+                        // Show achievement tooltip
+                        showTooltip(`🔥 ${streak} day streak!`, cellRect.left, cellRect.top - 40);
+                        setTimeout(hideTooltip, 2000);
+                    }
+                }
+                
+                // Update heat map and save
+                const [year, month, day] = dateKey.split('-');
+                updateHeatMapForDay(parseInt(year), parseInt(month), parseInt(day));
+                
+                // Update target bars in real-time
+                updateTargetBars();
+                
+                // Force an immediate save to ensure data is persisted
+                const saveSuccess = saveToLocalStorage();
+                console.log(`CLICK - Data saved to localStorage: ${saveSuccess}`);
+                
+                // Pre-verification to see what's actually in the browser's localStorage
+                const rawStorageBeforeVerify = localStorage.getItem('dailyHabits_completedDays');
+                console.log(`CLICK - Raw localStorage value:`, rawStorageBeforeVerify);
+                
+                // Make multiple verification attempts to ensure data is properly saved
+                const verifyData = () => {
+                    const savedData = localStorage.getItem('dailyHabits_completedDays');
+                    if (savedData) {
+                        try {
+                            const parsed = JSON.parse(savedData);
+                            console.log(`CLICK - Verification check - Is ${dateKey} marked correctly:`, parsed[dateKey]);
+                            
+                            // If the data doesn't match what we expect, try saving again
+                            const expectedValue = newState; // Use the local variable we set earlier
+                            if (parsed[dateKey] !== expectedValue) {
+                                console.log(`CLICK - Data mismatch! Expected ${expectedValue} but got ${parsed[dateKey]}. Trying to save again...`);
+                                // Make sure memory matches what we want
+                                completedDays[dateKey] = newState;
+                                // Try saving again
+                                saveToLocalStorage();
+                                
+                                // Also ensure UI matches our data
+                                if (newState === "true" && !cell.classList.contains('completed')) {
+                                    cell.classList.add('completed');
+                                } else if (newState === "false" && cell.classList.contains('completed')) {
+                                    cell.classList.remove('completed');
+                                }
+                            }
+                        } catch (e) {
+                            console.error("CLICK - Error parsing saved data:", e);
+                            // Try saving again
+                            saveToLocalStorage();
+                        }
+                    } else {
+                        console.error("CLICK - No saved data found in verification!");
+                        // Try to save again
+                        saveToLocalStorage();
+                    }
+                };
+                
+                // Verify multiple times with increasing delays
+                setTimeout(verifyData, 100);
+                setTimeout(verifyData, 500);
+                setTimeout(verifyData, 1000);
+                
+                updateHabitGraph();
+            }
         });
         
         // Add haptic feedback function (for supported devices)
@@ -2536,7 +3380,7 @@
             tooltip.style.top = `${y}px`;
             tooltip.classList.add('visible');
         }
-        
+
         function hideTooltip() {
             tooltip.classList.remove('visible');
         }
@@ -2563,58 +3407,96 @@
             
             return currentStreak;
         }
-        
-        // Enhanced habit cell click with haptic feedback and animations
-        function enhancedHabitCellClick(cell, dateKey) {
-            // Add ripple effect
-            const rect = cell.getBoundingClientRect();
-            const x = rect.width / 2;
-            const y = rect.height / 2;
+    </script>
+    
+    <script>
+        // Add a final safety check when the window loads
+        window.onload = function() {
+            console.log("Window loaded - Running final safety checks");
             
-            const ripple = document.createElement('div');
-            ripple.className = 'ripple-effect';
-            cell.appendChild(ripple);
-            
-            ripple.animate([
-                { top: y + 'px', left: x + 'px', width: '0', height: '0', opacity: 0.5 },
-                { top: y + 'px', left: x + 'px', width: '150%', height: '150%', opacity: 0 }
-            ], {
-                duration: 400,
-                easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)'
-            }).onfinish = () => ripple.remove();
-            
-            // Toggle completion state with enhanced animation
-            if (cell.classList.contains('completed')) {
-                cell.classList.remove('completed');
-                completedDays[dateKey] = false;
-                triggerHapticFeedback('light');
-            } else {
-                cell.classList.remove('crossed');
-                cell.classList.add('completed');
-                completedDays[dateKey] = true;
-                triggerHapticFeedback('success');
+            try {
+                // Ensure all global variables are defined to prevent ReferenceError
+                if (typeof habits === 'undefined') habits = [];
+                if (typeof completedDays === 'undefined') completedDays = {};
+                if (typeof habitNotes === 'undefined') habitNotes = {};
+                if (typeof habitTargets === 'undefined') habitTargets = {};
                 
-                // Check if this completes a streak milestone (5, 10, 25, etc.)
-                const habitType = dateKey.split('-')[3];
-                const streak = calculateStreak(habitType);
+                // Check if we have data in localStorage
+                const savedHabits = localStorage.getItem('dailyHabits_habits');
+                const savedCompletedDays = localStorage.getItem('dailyHabits_completedDays');
                 
-                if (streak === 5 || streak === 10 || streak === 25 || streak === 50 || streak === 100) {
-                    // Show confetti for streak milestone
-                    const cellRect = cell.getBoundingClientRect();
-                    showConfetti(cellRect.left + cellRect.width / 2, cellRect.top + cellRect.height / 2);
-                    
-                    // Show achievement tooltip
-                    showTooltip(`🔥 ${streak} day streak!`, cellRect.left, cellRect.top - 40);
-                    setTimeout(hideTooltip, 2000);
+                console.log("Window.onload check:", {
+                    habitsInMemory: habits.length,
+                    completedDaysInMemory: Object.keys(completedDays).length,
+                    habitsInStorage: savedHabits ? "present" : "absent",
+                    completedDaysInStorage: savedCompletedDays ? "present" : "absent"
+                });
+                
+                // Look for UI elements that should show our data
+                const habitRows = document.querySelectorAll('.habit-row');
+                const needsUIRefresh = (savedHabits && habits.length > 0 && habitRows.length === 0);
+                
+                // Check if localStorage and memory are out of sync
+                let needsDataReload = false;
+                
+                if (savedHabits && (!habits || habits.length === 0)) {
+                    console.log("Habits data mismatch - stored data but empty memory");
+                    needsDataReload = true;
                 }
+                
+                if (savedCompletedDays && (!completedDays || Object.keys(completedDays).length === 0)) {
+                    console.log("CompletedDays data mismatch - stored data but empty memory");
+                    needsDataReload = true;
+                }
+                
+                // If anything needs fixing, reload and refresh
+                if (needsDataReload || needsUIRefresh) {
+                    console.log("Found issues - reloading data and refreshing UI");
+                    
+                    // Reload data from localStorage
+                    loadFromLocalStorage();
+                    
+                    // Refresh the UI
+                    if (typeof updateCalendar === 'function') {
+                        updateCalendar();
+                        console.log("Calendar updated");
+                    }
+                    
+                    // Update other UI elements with delays to ensure rendering
+                    setTimeout(function() {
+                        if (typeof updateTargetBars === 'function') {
+                            updateTargetBars();
+                            console.log("Target bars updated");
+                        }
+                    }, 100);
+                    
+                    setTimeout(function() {
+                        if (typeof updateHabitGraph === 'function') {
+                            updateHabitGraph();
+                            console.log("Habit graph updated");
+                        }
+                        
+                        if (typeof updateGoalSection === 'function') {
+                            updateGoalSection();
+                            console.log("Goal section updated");
+                        }
+                    }, 200);
+                    
+                    // Final check after reload
+                    setTimeout(function() {
+                        console.log("Final state after reload:", {
+                            habitsInMemory: habits.length,
+                            completedDaysInMemory: Object.keys(completedDays).length,
+                            habitRowsInUI: document.querySelectorAll('.habit-row').length
+                        });
+                    }, 500);
+                } else {
+                    console.log("Data appears to be in sync, no reload needed");
+                }
+            } catch (e) {
+                console.error("Error in window.onload safety check:", e);
             }
-            
-            // Update heat map and save
-            const [year, month, day] = dateKey.split('-');
-            updateHeatMapForDay(parseInt(year), parseInt(month), parseInt(day));
-            saveToLocalStorage();
-            updateHabitGraph();
-        }
+        };
     </script>
 </body>
 </html>
