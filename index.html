@@ -1361,7 +1361,7 @@
                     
                     habits.forEach(habit => {
                         const dateKey = `${year}-${month}-${dayNumber}-${habit.type}`;
-                        if (completedDays[dateKey] === true) {
+                        if (completedDays[dateKey] === true || completedDays[dateKey] === "true") {
                             completedCount++;
                         }
                     });
@@ -1481,7 +1481,7 @@
                         let completedCount = 0;
                         for (let i = 1; i <= daysInMonth; i++) {
                             const dateKey = `${year}-${month}-${i}-${habit.type}`;
-                            if (completedDays[dateKey] === true) {
+                            if (completedDays[dateKey] === true || completedDays[dateKey] === "true") {
                                 completedCount++;
                             }
                         }
@@ -2346,7 +2346,7 @@
                         
                         habits.forEach(habit => {
                             const dateKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-${habit.type}`;
-                            if (completedDays[dateKey] === true) {
+                            if (completedDays[dateKey] === true || completedDays[dateKey] === "true") {
                                 completedCount++;
                             }
                         });
@@ -2515,7 +2515,12 @@
             
             // Add new habit functionality
             const addHabitBtn = document.getElementById('add-habit-btn');
-            addHabitBtn.addEventListener('click', function() {
+            console.log("Add Habit Button Element:", addHabitBtn);
+            
+            // Define the function to show the Add Habit modal
+            function showAddHabitModal() {
+                console.log("Opening Add Habit modal");
+                
                 // Create modal for new habit
                 const overlay = document.createElement('div');
                 overlay.className = 'note-overlay';
@@ -2532,7 +2537,7 @@
                 input.className = 'habit-name-input';
                 input.placeholder = 'Enter habit name';
                 input.maxLength = 100; // Prevent extremely long habit names
-                input.value = habitName || '';
+                input.value = '';
                 input.style.width = '100%';
                 
                 // Add target toggle
@@ -2680,7 +2685,11 @@
                 // Add event listeners
                 addButton.addEventListener('click', addHabit);
                 cancelButton.addEventListener('click', closeModal);
-                overlay.addEventListener('click', closeModal);
+                overlay.addEventListener('click', function(e) {
+                    if (e.target === overlay) {
+                        closeModal();
+                    }
+                });
                 
                 // Handle Enter and Escape keys
                 input.addEventListener('keydown', function(e) {
@@ -2698,7 +2707,26 @@
                         closeModal();
                     }
                 });
-            });
+            }
+            
+            // Clear old listener and add a new one
+            if (addHabitBtn) {
+                // Remove any existing listeners
+                addHabitBtn.replaceWith(addHabitBtn.cloneNode(true));
+                
+                // Get the new button reference
+                const newAddHabitBtn = document.getElementById('add-habit-btn');
+                
+                // Add the click listener
+                newAddHabitBtn.addEventListener('click', function() {
+                    console.log("Add Habit button clicked");
+                    showAddHabitModal();
+                });
+                
+                console.log("Add Habit button event listener set up");
+            } else {
+                console.error("Add Habit button not found in the DOM");
+            }
             
             // Function to update heat map for a specific day with smoother transitions
             function updateHeatMapForDay(year, month, dayNumber) {
@@ -2719,7 +2747,7 @@
                 
                 habits.forEach(habit => {
                     const dateKey = `${year}-${month}-${dayNumber}-${habit.type}`;
-                    if (completedDays[dateKey] === true) {
+                    if (completedDays[dateKey] === true || completedDays[dateKey] === "true") {
                         completedCount++;
                     }
                 });
@@ -3187,7 +3215,7 @@
                         let completedCount = 0;
                         for (let i = 1; i <= daysInMonth; i++) {
                             const dateKey = `${year}-${month}-${i}-${habitType}`;
-                            if (completedDays[dateKey] === "true") {
+                            if (completedDays[dateKey] === "true" || completedDays[dateKey] === true) {
                                 completedCount++;
                             }
                         }
@@ -3397,7 +3425,7 @@
                 const day = date.getDate();
                 const dateKey = `${year}-${month}-${day}-${habitType}`;
                 
-                if (completedDays[dateKey] === true) {
+                if (completedDays[dateKey] === true || completedDays[dateKey] === "true") {
                     currentStreak++;
                     date.setDate(date.getDate() - 1);
                 } else {
