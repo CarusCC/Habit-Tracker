@@ -641,7 +641,7 @@
             filter: brightness(0.95);
             box-shadow: var(--shadow-sm);
         }
-        
+
         .graph-container {
             margin: 3rem 2.5rem;
             padding: 2.5rem;
@@ -854,7 +854,7 @@
             border-radius: 2px;
             transition: width 0.3s ease;
         }
-        
+
         .habit-target-label {
             white-space: nowrap;
             overflow: hidden; /* Prevent overflow */
@@ -1010,8 +1010,8 @@
         <div class="logo">HabitTracker</div>
         <div class="header-actions">
             <button id="goal-button" class="header-button" title="Set Monthly Goal">🎯</button>
-            <div class="theme-toggle" id="theme-toggle">
-                <span id="theme-icon">🌙</span>
+        <div class="theme-toggle" id="theme-toggle">
+            <span id="theme-icon">🌙</span>
             </div>
         </div>
     </header>
@@ -1125,12 +1125,12 @@
             // Load data from localStorage if available
             function loadFromLocalStorage() {
                 try {
-                    const savedHabits = localStorage.getItem('dailyHabits_habits');
-                    const savedCompletedDays = localStorage.getItem('dailyHabits_completedDays');
-                    const savedCurrentDate = localStorage.getItem('dailyHabits_currentDate');
-                    const savedHabitNotes = localStorage.getItem('dailyHabits_habitNotes');
-                    const savedDarkMode = localStorage.getItem('dailyHabits_darkMode');
-                    const savedHabitTargets = localStorage.getItem('dailyHabits_habitTargets');
+                const savedHabits = localStorage.getItem('dailyHabits_habits');
+                const savedCompletedDays = localStorage.getItem('dailyHabits_completedDays');
+                const savedCurrentDate = localStorage.getItem('dailyHabits_currentDate');
+                const savedHabitNotes = localStorage.getItem('dailyHabits_habitNotes');
+                const savedDarkMode = localStorage.getItem('dailyHabits_darkMode');
+                const savedHabitTargets = localStorage.getItem('dailyHabits_habitTargets');
                     const savedGoal = localStorage.getItem('dailyHabits_goal');
                     
                     console.log("Loading from localStorage - Raw data:", {
@@ -1138,42 +1138,42 @@
                         savedCompletedDays,
                         savedCurrentDate
                     });
-                    
-                    if (savedHabits) {
-                        habits = JSON.parse(savedHabits);
-                    }
-                    
-                    if (savedCompletedDays) {
-                        completedDays = JSON.parse(savedCompletedDays);
+                
+                if (savedHabits) {
+                    habits = JSON.parse(savedHabits);
+                }
+                
+                if (savedCompletedDays) {
+                    completedDays = JSON.parse(savedCompletedDays);
                         console.log("Loaded completedDays directly:", completedDays);
+                }
+                
+                if (savedCurrentDate) {
+                    const dateObj = new Date(savedCurrentDate);
+                    // Only use saved date if it's valid
+                    if (!isNaN(dateObj.getTime())) {
+                        currentDate = dateObj;
                     }
-                    
-                    if (savedCurrentDate) {
-                        const dateObj = new Date(savedCurrentDate);
-                        // Only use saved date if it's valid
-                        if (!isNaN(dateObj.getTime())) {
-                            currentDate = dateObj;
-                        }
-                    }
-                    
-                    if (savedHabitNotes) {
-                        habitNotes = JSON.parse(savedHabitNotes);
-                    }
-                    
-                    if (savedHabitTargets) {
-                        habitTargets = JSON.parse(savedHabitTargets);
-                    }
+                }
+                
+                if (savedHabitNotes) {
+                    habitNotes = JSON.parse(savedHabitNotes);
+                }
+                
+                if (savedHabitTargets) {
+                    habitTargets = JSON.parse(savedHabitTargets);
+                }
                     
                     if (savedGoal) {
                         goalData = JSON.parse(savedGoal);
                     }
-                    
-                    if (savedDarkMode) {
-                        isDarkMode = savedDarkMode === 'true';
-                        if (isDarkMode) {
-                            document.documentElement.setAttribute('data-theme', 'dark');
-                            themeIcon.textContent = '☀️';
-                        }
+                
+                if (savedDarkMode) {
+                    isDarkMode = savedDarkMode === 'true';
+                    if (isDarkMode) {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                        themeIcon.textContent = '☀️';
+                    }
                     }
                 } catch (e) {
                     console.error("Error loading from localStorage:", e);
@@ -1254,13 +1254,13 @@
                     // No conversion needed since we're now storing "true"/"false" strings directly
                     
                     // Save all data
-                    localStorage.setItem('dailyHabits_habits', JSON.stringify(habits));
-                    localStorage.setItem('dailyHabits_completedDays', JSON.stringify(completedDays));
-                    localStorage.setItem('dailyHabits_currentDate', currentDate.toISOString());
-                    localStorage.setItem('dailyHabits_habitNotes', JSON.stringify(habitNotes));
-                    localStorage.setItem('dailyHabits_habitTargets', JSON.stringify(habitTargets));
+                localStorage.setItem('dailyHabits_habits', JSON.stringify(habits));
+                localStorage.setItem('dailyHabits_completedDays', JSON.stringify(completedDays));
+                localStorage.setItem('dailyHabits_currentDate', currentDate.toISOString());
+                localStorage.setItem('dailyHabits_habitNotes', JSON.stringify(habitNotes));
+                localStorage.setItem('dailyHabits_habitTargets', JSON.stringify(habitTargets));
                     localStorage.setItem('dailyHabits_goal', JSON.stringify(goalData));
-                    localStorage.setItem('dailyHabits_darkMode', isDarkMode);
+                localStorage.setItem('dailyHabits_darkMode', isDarkMode);
                     
                     // Verify data was saved correctly
                     const savedCompletedDays = localStorage.getItem('dailyHabits_completedDays');
@@ -1562,7 +1562,7 @@
                         } else if (completedDays[dateKey] === "crossed" || completedDays[dateKey] === "false") {
                             // For backward compatibility check both crossed and false
                             if (completedDays[dateKey] === "crossed") {
-                                habitCell.classList.add('crossed');
+                            habitCell.classList.add('crossed');
                                 console.log(`Cell ${dateKey} marked as crossed from saved data`);
                             }
                         }
@@ -1623,9 +1623,9 @@
                             } else {
                                 this.classList.remove('completed');
                                 this.classList.add('crossed');
-                                // Store as STRING, not boolean
-                                completedDays[dateKey] = "false";
-                                console.log(`CONTEXT - Added crossed to ${dateKey}, set to "false"`);
+                                // Store as STRING, not boolean - for crossed state
+                                completedDays[dateKey] = "crossed";
+                                console.log(`CONTEXT - Added crossed to ${dateKey}, set to "crossed"`);
                             }
                             
                             // Update heat map for this day
@@ -1647,7 +1647,7 @@
                                     console.log(`CONTEXT - Full completedDays object in localStorage:`, savedData);
                                     
                                     // If the data doesn't match what we expect, try saving again
-                                    const expectedValue = "false"; // Context menu always sets to "false" string
+                                    const expectedValue = this.classList.contains('crossed') ? "crossed" : "false";
                                     if (parsed[dateKey] !== expectedValue) {
                                         console.log(`CONTEXT - Data mismatch! Expected ${expectedValue} but got ${parsed[dateKey]}. Trying to save again...`);
                                         saveToLocalStorage();
@@ -3408,7 +3408,7 @@
             tooltip.style.top = `${y}px`;
             tooltip.classList.add('visible');
         }
-
+        
         function hideTooltip() {
             tooltip.classList.remove('visible');
         }
@@ -3500,7 +3500,7 @@
                     
                     setTimeout(function() {
                         if (typeof updateHabitGraph === 'function') {
-                            updateHabitGraph();
+            updateHabitGraph();
                             console.log("Habit graph updated");
                         }
                         
